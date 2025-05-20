@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Supabase Task App</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Simple Supabase Test</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    input, button { padding: 0.5em; margin-top: 1em; }
+    ul { list-style: none; padding: 0; margin-top: 1em; }
+    li { background: #f0f0f0; margin: 0.5em 0; padding: 0.5em; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Task List</h1>
-    <input type="text" id="taskInput" placeholder="Enter a task..." />
-    <button onclick="addTask()">Add Task</button>
-    <ul id="taskList"></ul>
-  </div>
+  <h2>Supabase Task Test</h2>
+  <input type="text" id="taskInput" placeholder="Enter a task" />
+  <button onclick="addTask()">Add Task</button>
 
-  <!-- Load Supabase UMD bundle -->
+  <ul id="taskList"></ul>
+
+  <!-- Supabase client via UMD bundle -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
   <script src="script.js"></script>
 </body>

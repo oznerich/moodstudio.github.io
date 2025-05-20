@@ -8,8 +8,10 @@ const taskList = document.getElementById('taskList');
 
 async function fetchTasks() {
   const { data, error } = await supabase.from('tasks').select('*').order('id', { ascending: false });
+
   if (error) {
-    console.error('Fetch error:', error);
+    console.error('Error fetching:', error);
+    taskList.innerHTML = '<li>Error loading tasks</li>';
     return;
   }
 
@@ -22,17 +24,19 @@ async function fetchTasks() {
 }
 
 async function addTask() {
-  const taskName = taskInput.value.trim();
-  if (!taskName) return;
+  const name = taskInput.value.trim();
+  if (!name) return;
 
-  const { error } = await supabase.from('tasks').insert([{ name: taskName }]);
+  const { error } = await supabase.from('tasks').insert([{ name }]);
+
   if (error) {
     console.error('Insert error:', error);
+    alert('Failed to add task.');
     return;
   }
 
   taskInput.value = '';
-  fetchTasks();
+  fetchTasks(); // Refresh the task list after insert
 }
 
-fetchTasks();
+fetchTasks(); // Initial load
