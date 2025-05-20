@@ -1,11 +1,7 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
-const supabase = createClient(
-  'https://rdgahcjjbewvyqcfdtih.supabase.co',
-  'eyJhbGciOi...qvhPHqnEqIU'
-);
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
@@ -13,7 +9,7 @@ const taskList = document.getElementById('taskList');
 async function fetchTasks() {
   const { data, error } = await supabase.from('tasks').select('*').order('id', { ascending: false });
   if (error) {
-    console.error('Error fetching tasks:', error);
+    console.error('Fetch error:', error);
     return;
   }
 
@@ -25,16 +21,18 @@ async function fetchTasks() {
   });
 }
 
-window.addTask = async function () {
+async function addTask() {
   const taskName = taskInput.value.trim();
   if (!taskName) return;
 
   const { error } = await supabase.from('tasks').insert([{ name: taskName }]);
   if (error) {
-    console.error('Error adding task:', error);
-  } else {
-    taskInput.value = '';
-    fetchTasks();
+    console.error('Insert error:', error);
+    return;
   }
-};
+
+  taskInput.value = '';
+  fetchTasks();
+}
+
 fetchTasks();
