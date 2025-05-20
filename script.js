@@ -1,42 +1,45 @@
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+document.addEventListener('DOMContentLoaded', () => {
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const taskInput = document.getElementById('taskInput');
-const taskList = document.getElementById('taskList');
+  const taskInput = document.getElementById('taskInput');
+  const taskList = document.getElementById('taskList');
 
-async function fetchTasks() {
-  const { data, error } = await supabase.from('tasks').select('*').order('id', { ascending: false });
+  async function fetchTasks() {
+    const { data, error } = await supabaseClient
+      .from('tasks')
+      .select('*')
+      .order('id', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching:', error);
-    taskList.innerHTML = '<li>Error loading tasks</li>';
-    return;
+    if (error) {
+      console.error('Fetch error:', error);
+      taskList.innerHTML = '<li>Error loading tasks</li>';
+      return;
+    }
+
+    taskList.innerHTML = '';
+    data.forEach(task => {
+      const li = document.createElement('li');
+      li.textContent = task.name;
+      taskList.appendChild(li);
+    });
   }
 
-  taskList.innerHTML = '';
-  data.forEach(task => {
-    const li = document.createElement('li');
-    li.textContent = task.name;
-    taskList.appendChild(li);
-  });
-}
+  window.addTask = async function () {
+    const taskName = taskInput.value.trim();
+    if (!taskName) return;
 
-async function addTask() {
-  const name = taskInput.value.trim();
-  if (!name) return;
+    const { error } = await supabaseClient.from('tasks').insert([{ name: taskName }]);
+    if (error) {
+      console.error('Insert error:', error);
+      return;
+    }
 
-  const { error } = await supabase.from('tasks').insert([{ name }]);
+    taskInput.value = '';
+    fetchTasks();
+  };
 
-  if (error) {
-    console.error('Insert error:', error);
-    alert('Failed to add task.');
-    return;
-  }
-
-  taskInput.value = '';
-  fetchTasks(); // Refresh the task list after insert
-}
-
-fetchTasks(); // Initial load
+  fetchTasks();
+});
