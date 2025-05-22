@@ -95,7 +95,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     alert(`Login failed: ${error.message}`);
   } else {
     alert("Login successful!");
-    window.location.href = "dashboard.html";
+    window.location.href = "user-mainpage.html";
   }
 });
 
