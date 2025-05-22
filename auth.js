@@ -45,12 +45,10 @@ document
     }
 
     // 1. Sign up user
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
-      {
-        email,
-        password,
-      }
-    );
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
     if (signUpError) {
       alert(`Registration failed: ${signUpError.message}`);
@@ -82,19 +80,47 @@ document
     }
   });
 
-// Login
+// Login (with role-based redirect)
 document.getElementById("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (error) {
-    alert(`Login failed: ${error.message}`);
+  if (authError) {
+    alert(`Login failed: ${authError.message}`);
+    return;
+  }
+
+  const user = authData?.user;
+  if (!user) {
+    alert("Login succeeded but user info is missing.");
+    return;
+  }
+
+  // Fetch role from profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) {
+    alert(`Failed to fetch profile: ${profileError.message}`);
+    return;
+  }
+
+  const role = profile?.role;
+
+  // Redirect based on role
+  if (role === "Admin" || role === "Super Admin") {
+    window.location.href = "admin-dashboard.html";
   } else {
-    alert("Login successful!");
     window.location.href = "user-mainpage.html";
   }
 });
