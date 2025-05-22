@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mood Studios - Scroll Navigation with Ease-In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style-user-mainpage.css" />
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <span class="logo">Mood Studios</span>
+  </div>
+  <ul class="nav-links">
+    <li class="nav-item"><a href="#home">Home</a></li>
+    <li class="nav-item"><a href="#packages">Packages</a></li>
+    <li class="nav-item"><a href="#contact">Contact Us</a></li>
+    <li class="nav-item"><a href="#about">About Us</a></li>
+    <li class="nav-item">
+        <a href="#" class="logout-btn" onclick="handleLogout(event)">Logout</a>
+    </li>
+  </ul>
+</nav>
+
+
+
+  <div class="spacer"></div> <!-- Push down to compensate fixed navbar -->
+
+  <section id="home">
+    <h2>Welcome to Mood Studios</h2>
+    <p>Experience unforgettable moments with us. Book your shoot now!</p>
+  </section>
+
+  <section id="packages">
+    <h2>Our Packages</h2>
+    <p>Choose from a variety of photography and videography packages tailored to your needs.</p>
+  </section>
+
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Email: moodstudios@example.com<br />Phone: 0912-345-6789</p>
+  </section>
+
+  <section id="about">
+    <h2>About Mood Studios</h2>
+    <p>We are a creative team capturing life’s best moments with heart and artistry.</p>
+  </section>
+
+  <script src="script-user-mainpage.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="style-dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Header -->
+      <header class="dashboard-header">
+        <h1>Mood Studios</h1>
+        <a href="index.html" class="logout">Logout</a>
+      </header>
+
+      <div class="dashboard-content">
+        <!-- Sidebar -->
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <ul>
+            <li
+              class="sidebar-item active"
+              onclick="showTab('dashboard', this)"
+            >
+              Dashboard
+            </li>
+            <li class="sidebar-item" onclick="showTab('appointments', this)">
+              Appointments
+            </li>
+            <li class="sidebar-item" onclick="showTab('payments', this)">
+              Payment History
+            </li>
+            <li class="sidebar-item" onclick="showTab('gallery', this)">
+              Gallery
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+          <section id="dashboard" class="tab active">
+            <h2>Welcome to your Dashboard!</h2>
+            <p>This is the overview section.</p>
+          </section>
+
+          <section id="appointments" class="tab">
+            <h2>Your Appointments</h2>
+            <p>List of scheduled appointments goes here.</p>
+          </section>
+
+          <section id="payments" class="tab">
+            <h2>Payment History</h2>
+            <p>Transaction history will be shown here.</p>
+          </section>
+
+          <section id="gallery" class="tab">
+            <h2>Gallery</h2>
+            <p>Gallery photos or uploads appear here.</p>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="script-admin-dashboard.js"></script>
+  </body>
+</html>

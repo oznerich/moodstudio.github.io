@@ -1,0 +1,150 @@
+/* GENERAL RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: rgb(255, 236, 254);
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #0056d2;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #eef3fc;
+  text-shadow: 0 0 5px rgba(255 255 255 / 0.5);
+  cursor: default;
+  user-select: text;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item a {
+  color: #cbd5e1;
+  font-weight: 200;
+  font-size: 0.8rem;
+  letter-spacing: 0.2rem;
+  text-decoration: none;
+  padding-bottom: 0.1rem;
+  border-bottom: 3px solid transparent;
+  border-radius: 4px 4px 0 0;
+  transition: color 0.3s ease, transform 0.25s ease, letter-spacing 0.3s ease,
+    fontweight 0.25s ease;
+  outline-offset: 1px;
+  display: inline-block;
+}
+
+.nav-item a:hover,
+.nav-item a:focus {
+  color: #fff;
+  transform: scale(1.05);
+  outline: none;
+}
+
+.nav-item a.active {
+  color: #fff;
+  font-weight: 600;
+  border-bottom-color: #ffd700;
+  letter-spacing: 0.1rem;
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.logout-btn:hover,
+.logout-btn:focus {
+  color: white;
+  transform: scale(1.05);
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+/* SPACER to offset fixed navbar */
+.spacer {
+  height: 60px;
+}
+
+/* SECTIONS */
+section {
+  padding: 100px 20px 80px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  background: rgb(255, 236, 254);
+  transition: background-color 0.3s ease;
+}
+
+section:target {
+  background-color: #f0f8ff;
+  box-shadow: 0 0 20px #a5d8ffcc;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #0b3d91;
+}
+
+p {
+  font-size: 1.3rem;
+  max-width: 600px;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE NAV */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .nav-links {
+    gap: 1.2rem;
+  }
+
+  section {
+    padding: 80px 15px 60px;
+  }
+}
