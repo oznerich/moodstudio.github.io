@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>User Dashboard</title>
     <link rel="stylesheet" href="style-dashboard.css" />
   </head>
@@ -16,21 +16,11 @@
       <div class="dashboard-content">
         <aside class="sidebar">
           <ul>
-            <li class="sidebar-item active" onclick="showTab('dashboard', this)">
-              Dashboard
-            </li>
-            <li class="sidebar-item" onclick="showTab('appointments', this)">
-              Appointments
-            </li>
-            <li class="sidebar-item" onclick="showTab('booking-history', this)">
-              Booking History
-            </li>
-            <li class="sidebar-item" onclick="showTab('user-management', this)">
-              User Management
-            </li>
-            <li class="sidebar-item" onclick="showTab('gallery', this)">
-              Gallery
-            </li>
+            <li class="sidebar-item active" onclick="showTab('dashboard', this)">Dashboard</li>
+            <li class="sidebar-item" onclick="showTab('appointments', this)">Appointments</li>
+            <li class="sidebar-item" onclick="showTab('booking-history', this)">Booking History</li>
+            <li class="sidebar-item" onclick="showTab('user-management', this)">User Management</li>
+            <li class="sidebar-item" onclick="showTab('gallery', this)">Gallery</li>
           </ul>
         </aside>
 
@@ -201,9 +191,6 @@
         </main>
       </div>
     </div>
-
-    <!-- Removed the old supabase CDN script to avoid conflict with ES modules -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
 
     <script src="script-admin-dashboard.js" type="module"></script>
   </body>
