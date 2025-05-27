@@ -8,65 +8,36 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Tab Management
 function showTab(tabId, element) {
-  // Hide all tabs
-  document.querySelectorAll(".tab").forEach((tab) => {
-    tab.classList.remove("active");
-  });
+  document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+  document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
 
-  // Remove 'active' class from all sidebar items
-  document.querySelectorAll(".sidebar-item").forEach((item) => {
-    item.classList.remove("active");
-  });
-
-  // Show the selected tab
   const activeTab = document.getElementById(tabId);
-  if (activeTab) {
-    activeTab.classList.add("active");
-  }
+  if (activeTab) activeTab.classList.add("active");
+  if (element) element.classList.add("active");
 
-  // Set clicked sidebar item as active
-  if (element) {
-    element.classList.add("active");
-  }
-
-  // Load data when specific tabs are shown
-  if (tabId === 'user management') {
+  if (tabId === 'user-management') {
+    document.getElementById('addUserForm')?.addEventListener('submit', addUser);
     loadUsers();
   }
 }
 
-// User Management Functions
+// User Management
 async function loadUsers() {
   try {
-    console.log('Loading users from Supabase...');
-    
-    const { data: users, error, status } = await supabase
+    const { data: users, error } = await supabase
       .from('profiles')
-      .select('id, email, first_name, last_name, role, contact, birthday, created_at')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    console.log('Supabase response status:', status);
-    
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
+    if (error) throw error;
 
-    if (!users || users.length === 0) {
-      console.warn('No users found in database');
-      const userList = document.querySelector('#user management .user-list');
-      userList.innerHTML = '<li class="user-item">No users found</li>';
-      return;
-    }
-
-    const userList = document.querySelector('#user management .user-list');
+    const userList = document.querySelector('#user-management .user-list');
     userList.innerHTML = users.map(user => `
       <li class="user-item" data-id="${user.id}">
         <span>
-          ${user.first_name || ''} ${user.last_name || ''} 
-          <small>(${user.email})</small>
-          <br>
-          <small>Role: ${user.role} | Contact: ${user.contact || 'N/A'}</small>
+          ${user.first_name} ${user.last_name} 
+          <small>(${user.email})</small><br>
+          <small>Role: ${user.role} | Contact: ${user.contact}</small>
         </span>
         <div>
           <button class="edit-btn" onclick="editUser('${user.id}')">Edit</button>
@@ -74,63 +45,49 @@ async function loadUsers() {
         </div>
       </li>
     `).join('');
-    
-    console.log('Successfully loaded', users.length, 'users');
-  } catch (error) {
-    console.error('Error in loadUsers:', error);
-    alert(`Failed to load users: ${error.message}`);
-    
-    // Show error in UI
-    const userList = document.querySelector('#user management .user-list');
-    userList.innerHTML = `<li class="user-item error">Error loading users: ${error.message}</li>`;
+  } catch (err) {
+    console.error('Error loading users:', err);
+    alert(`Error loading users: ${err.message}`);
   }
 }
 
 async function addUser(event) {
   event.preventDefault();
-  
   const form = event.target;
+
   const userData = {
     email: form.querySelector('input[type="email"]').value,
     first_name: form.querySelector('input[placeholder="First Name"]').value,
     last_name: form.querySelector('input[placeholder="Last Name"]').value,
     birthday: form.querySelector('input[type="date"]').value,
     contact: form.querySelector('input[placeholder="Contact No."]').value,
-    role: 'User' // Default role
+    role: 'User'
   };
 
   try {
-    // First create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: userData.email,
       password: form.querySelector('input[type="password"]').value,
     });
-
     if (authError) throw authError;
 
-    // Then create profile
-    const { data: profileData, error: profileError } = await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
-      .insert([{
-        ...userData,
-        id: authData.user.id
-      }])
-      .select();
+      .insert([{ ...userData, id: authData.user.id }]);
 
     if (profileError) throw profileError;
 
     alert('User created successfully!');
     form.reset();
     loadUsers();
-  } catch (error) {
-    console.error('Error adding user:', error);
-    alert('Error creating user: ' + error.message);
+  } catch (err) {
+    console.error('Error creating user:', err);
+    alert('Error creating user: ' + err.message);
   }
 }
 
 async function editUser(userId) {
   try {
-    // Fetch user data
     const { data: user, error } = await supabase
       .from('profiles')
       .select('*')
@@ -139,7 +96,6 @@ async function editUser(userId) {
 
     if (error) throw error;
 
-    // Create modal for editing
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
@@ -168,20 +124,19 @@ async function editUser(userId) {
         </form>
       </div>
     `;
-
     document.body.appendChild(modal);
     document.getElementById('editUserForm').addEventListener('submit', updateUser);
-  } catch (error) {
-    console.error('Error editing user:', error);
+  } catch (err) {
+    console.error('Error editing user:', err);
     alert('Error editing user');
   }
 }
 
 async function updateUser(event) {
   event.preventDefault();
-  
   const form = event.target;
   const userId = form.querySelector('input[name="id"]').value;
+
   const updatedData = {
     first_name: form.querySelector('input[name="first_name"]').value,
     last_name: form.querySelector('input[name="last_name"]').value,
@@ -192,19 +147,18 @@ async function updateUser(event) {
   };
 
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .update(updatedData)
-      .eq('id', userId)
-      .select();
+      .eq('id', userId);
 
     if (error) throw error;
 
     alert('User updated successfully!');
     form.closest('.modal').remove();
     loadUsers();
-  } catch (error) {
-    console.error('Error updating user:', error);
+  } catch (err) {
+    console.error('Error updating user:', err);
     alert('Error updating user');
   }
 }
@@ -213,11 +167,9 @@ async function deleteUser(userId) {
   if (!confirm('Are you sure you want to delete this user?')) return;
 
   try {
-    // First delete the auth user
     const { error: authError } = await supabase.auth.admin.deleteUser(userId);
     if (authError) throw authError;
 
-    // Then delete the profile (this should happen automatically due to the foreign key cascade)
     const { error } = await supabase
       .from('profiles')
       .delete()
@@ -227,97 +179,19 @@ async function deleteUser(userId) {
 
     alert('User deleted successfully!');
     loadUsers();
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    alert('Error deleting user: ' + error.message);
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    alert('Error deleting user: ' + err.message);
   }
 }
 
-// Password toggle
 function togglePassword() {
   const passwordField = document.getElementById("password");
   passwordField.type = passwordField.type === "password" ? "text" : "password";
 }
 
-// Appointment validation
-document.getElementById("appointmentTime")?.addEventListener("input", function (e) {
-  const time = e.target.value;
-  if (time < "12:00" || time > "19:00") {
-    alert("Please select a time between 12:00 PM and 7:00 PM.");
-    e.target.value = "";
-  }
-});
-
-document.getElementById("appointmentDate")?.addEventListener("input", function (e) {
-  const date = new Date(e.target.value);
-  const day = date.getDay();
-  if (day === 1) {
-    alert("Appointments are not available on Mondays.");
-    e.target.value = "";
-  }
-});
-
-// Booking History
-function printReceipt(name, packageName, date) {
-  const receiptWindow = window.open('', '_blank');
-  receiptWindow.document.write(`
-    <html>
-    <head><title>Official Receipt</title></head>
-    <body>
-      <h2>Official Receipt</h2>
-      <p>Name: ${name}</p>
-      <p>Package: ${packageName}</p>
-      <p>Date: ${date}</p>
-      <hr>
-      <p>Thank you for booking at Mood Studios!</p>
-      <script>window.print();</script>
-    </body>
-    </html>
-  `);
-  receiptWindow.document.close();
-}
-
-function filterBookings() {
-  const filter = document.getElementById('bookingFilter').value;
-  const items = document.querySelectorAll('#bookingList .user-item');
-  const now = new Date();
-
-  items.forEach((item) => {
-    const dateStr = item.getAttribute('data-date');
-    const bookingDate = new Date(dateStr);
-    let show = false;
-
-    switch (filter) {
-      case 'day':
-        show = bookingDate.toDateString() === now.toDateString();
-        break;
-      case 'week':
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
-        show = bookingDate >= startOfWeek && bookingDate <= endOfWeek;
-        break;
-      case 'month':
-        show = bookingDate.getMonth() === new Date().getMonth() &&
-               bookingDate.getFullYear() === new Date().getFullYear();
-        break;
-      case 'year':
-        show = bookingDate.getFullYear() === new Date().getFullYear();
-        break;
-      default:
-        show = true;
-    }
-
-    item.style.display = show ? 'flex' : 'none';
-  });
-}
-
-// Initialize form submission
-document.getElementById('addUserForm')?.addEventListener('submit', addUser);
-
-// Load users when page loads if on user management tab
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('user management')?.classList.contains('active')) {
-    loadUsers();
+  if (document.getElementById('user-management')?.classList.contains('active')) {
+    showTab('user-management', document.querySelector('.sidebar-item.active'));
   }
 });
