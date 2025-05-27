@@ -28,12 +28,131 @@
 
         <!-- Main Content -->
         <main class="main-content">
-          <!-- All other sections remain the same... -->
-          <!-- Only this ID is changed below: -->
+          <section id="dashboard" class="tab active">
+            <h2>Welcome to your Dashboard!</h2>
+            <div class="user-form">
+              <div class="form-group dashboard-spacing">
+                <div class="edit-users">
+                  <h5>New Bookings</h5>
+                  <p>35</p>
+                </div>
+                <div class="edit-users">
+                  <h5>Refund Bookings</h5>
+                  <p>5</p>
+                </div>
+                <div class="edit-users">
+                  <h5>User Queue</h5>
+                  <p>12</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-users">
+              <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="flex: 1; color: #007bff; margin: 0;">Booking Analytics</h3>
+                <select>
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                  <option value="year">Year</option>
+                </select>
+              </div>
+              <div class="form-group dashboard-spacing">
+                <div class="edit-users" style="flex: 1; color: #555555;">
+                  <h5>Total Bookings</h5>
+                  <p>120</p>
+                </div>
+                <div class="edit-users" style="flex: 1; color: #555555;">
+                  <h5>Reviews</h5>
+                  <p>88</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-users">
+              <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="flex: 1; color: #007bff; margin: 0;">Availed Package</h3>
+                <select>
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                  <option value="year">Year</option>
+                </select>
+              </div>
+              <div class="form-group dashboard-spacing">
+                <div class="edit-users" style="flex: 1; color: #555555;">
+                  <h5>Keepsake</h5>
+                  <p>45</p>
+                </div>
+                <div class="edit-users" style="flex: 1; color: #555555;">
+                  <h5>Euphoria</h5>
+                  <p>30</p>
+                </div>
+                <div class="edit-users" style="flex: 1; color: #555555;">
+                  <h5>Serendipity</h5>
+                  <p>25</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="appointments" class="tab">
+            <h2>Your Appointments</h2>
+            <div class="user-form">
+              <h3>Add Appointment</h3>
+              <form id="addAppointmentForm">
+                <div class="form-group">
+                  <input type="text" placeholder="Full Name" required />
+                  <input type="tel" placeholder="Phone Number" required />
+                </div>
+                <div class="form-group">
+                  <input type="email" placeholder="Email" required />
+                  <select required>
+                    <option value="">Select Package</option>
+                    <option value="keepsake">Keepsake</option>
+                    <option value="serendipity">Serendipity</option>
+                    <option value="euphoria">Euphoria</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <input type="time" id="appointmentTime" required />
+                  <input type="date" id="appointmentDate" required />
+                </div>
+                <button type="submit">Add Appointment</button>
+              </form>
+            </div>
+
+            <div style="height: 2rem;"></div>
+
+            <div class="edit-users">
+              <h3>All Appointments</h3>
+              <ul class="user-list">
+                <li class="user-item">
+                  <span>John Doe - Keepsake</span>
+                  <div>
+                    <button class="edit-btn">Edit</button>
+                    <button class="edit-btn" style="background-color:#dc3545">Delete</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="edit-users">
+              <h3>Pending Appointments</h3>
+              <ul class="user-list">
+                <li class="user-item">
+                  <span>Jane Smith - Euphoria</span>
+                  <div>
+                    <button class="edit-btn">Accept</button>
+                    <button class="edit-btn" style="background-color:#dc3545">Decline</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+
           <section id="user-management" class="tab">
             <h2>User Management</h2>
-
-            <!-- Add User Form -->
             <div class="user-form">
               <h3>Add User</h3>
               <form id="addUserForm">
@@ -60,13 +179,39 @@
 
             <div class="edit-users">
               <h3>Edit Users</h3>
+              <ul class="user-list"></ul>
+            </div>
+          </section>
+
+          <section id="booking-history" class="tab">
+            <h2>Booking History</h2>
+            <div class="user-form">
+              <div class="form-group">
+                <select id="bookingFilter" onchange="filterBookings()">
+                  <option value="all">All</option>
+                  <option value="day">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="edit-users" id="bookingList">
+              <h3>Successful Bookings</h3>
               <ul class="user-list">
-                <!-- Dynamically loaded via JS -->
+                <li class="user-item" data-date="2025-05-27">
+                  <span>Maria Clara - Keepsake - May 27, 2025</span>
+                  <button class="edit-btn" onclick="printReceipt('Maria Clara', 'Keepsake', 'May 27, 2025')">Print Receipt</button>
+                </li>
               </ul>
             </div>
           </section>
 
-          <!-- Other sections unchanged -->
+          <section id="gallery" class="tab">
+            <h2>Gallery</h2>
+            <p>Gallery photos or uploads appear here.</p>
+          </section>
         </main>
       </div>
     </div>
