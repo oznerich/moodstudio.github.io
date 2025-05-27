@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Dashboard</title>
+    <title>Admin Dashboard | Mood Studios</title>
     <link rel="stylesheet" href="style-dashboard.css" />
   </head>
   <body>
@@ -16,13 +16,9 @@
 
       <div class="dashboard-content">
         <!-- Sidebar -->
-        <!-- Sidebar -->
         <aside class="sidebar">
           <ul>
-            <li
-              class="sidebar-item active"
-              onclick="showTab('dashboard', this)"
-            >
+            <li class="sidebar-item active" onclick="showTab('dashboard', this)">
               Dashboard
             </li>
             <li class="sidebar-item" onclick="showTab('appointments', this)">
@@ -42,21 +38,22 @@
 
         <!-- Main Content -->
         <main class="main-content">
+          <!-- Dashboard Tab -->
           <section id="dashboard" class="tab active">
             <h2>Welcome to your Dashboard!</h2>
             <div class="user-form">
               <div class="form-group dashboard-spacing">
                 <div class="edit-users">
                   <h5>New Bookings</h5>
-                  <p>35</p>
+                  <p id="new-bookings-count">0</p>
                 </div>
                 <div class="edit-users">
                   <h5>Refund Bookings</h5>
-                  <p>5</p>
+                  <p id="refund-bookings-count">0</p>
                 </div>
                 <div class="edit-users">
                   <h5>User Queue</h5>
-                  <p>12</p>
+                  <p id="user-queue-count">0</p>
                 </div>
               </div>
             </div>
@@ -64,7 +61,7 @@
             <div class="edit-users">
               <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="flex: 1; color: #007bff; margin: 0;">Booking Analytics</h3>
-                <select>
+                <select id="analytics-timeframe">
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
@@ -74,11 +71,11 @@
               <div class="form-group dashboard-spacing">
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Total Bookings</h5>
-                  <p>120</p>
+                  <p id="total-bookings-count">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Reviews</h5>
-                  <p>88</p>
+                  <p id="reviews-count">0</p>
                 </div>
               </div>
             </div>
@@ -86,7 +83,7 @@
             <div class="edit-users">
               <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="flex: 1; color: #007bff; margin: 0;">Availed Package</h3>
-                <select>
+                <select id="package-timeframe">
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
@@ -96,82 +93,67 @@
               <div class="form-group dashboard-spacing">
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Keepsake</h5>
-                  <p>45</p>
+                  <p id="keepsake-count">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Euphoria</h5>
-                  <p>30</p>
+                  <p id="euphoria-count">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Serendipity</h5>
-                  <p>25</p>
+                  <p id="serendipity-count">0</p>
                 </div>
               </div>
             </div>
           </section>
-     
-        <!-- Appointments Section -->
-        <section id="appointments" class="tab">
-          <h2>Your Appointments</h2>
 
-          <!-- Add Appointment Form -->
-          <div class="user-form">
-            <h3>Add Appointment</h3>
-            <form id="addAppointmentForm">
-              <div class="form-group">
-                <input type="text" placeholder="Full Name" required />
-                <input type="tel" placeholder="Phone Number" required />
-              </div>
-              <div class="form-group">
-                <input type="email" placeholder="Email" required />
-                <select required>
-                  <option value="">Select Package</option>
-                  <option value="keepsake">Keepsake</option>
-                  <option value="serendipity">Serendipity</option>
-                  <option value="euphoria">Euphoria</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <input type="time" id="appointmentTime" required />
-                <input type="date" id="appointmentDate" required />
-              </div>
-              <button type="submit">Add Appointment</button>
-            </form>
-          </div>
+          <!-- Appointments Section -->
+          <section id="appointments" class="tab">
+            <h2>Appointments</h2>
 
-          <!-- Spacer between sections -->
-          <div style="height: 2rem;"></div>
-
-          <!-- All Appointments -->
-          <div class="edit-users">
-            <h3>All Appointments</h3>
-            <ul class="user-list">
-              <li class="user-item">
-                <span>John Doe - Keepsake</span>
-                <div>
-                  <button class="edit-btn">Edit</button>
-                  <button class="edit-btn" style="background-color:#dc3545">Delete</button>
+            <!-- Add Appointment Form -->
+            <div class="user-form">
+              <h3>Add Appointment</h3>
+              <form id="addAppointmentForm">
+                <div class="form-group">
+                  <input type="text" placeholder="Full Name" required />
+                  <input type="tel" placeholder="Phone Number" required />
                 </div>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Pending Appointments -->
-          <div class="edit-users">
-            <h3>Pending Appointments</h3>
-            <ul class="user-list">
-              <li class="user-item">
-                <span>Jane Smith - Euphoria</span>
-                <div>
-                  <button class="edit-btn">Accept</button>
-                  <button class="edit-btn" style="background-color:#dc3545">Decline</button>
+                <div class="form-group">
+                  <input type="email" placeholder="Email" required />
+                  <select required>
+                    <option value="">Select Package</option>
+                    <option value="keepsake">Keepsake</option>
+                    <option value="serendipity">Serendipity</option>
+                    <option value="euphoria">Euphoria</option>
+                  </select>
                 </div>
-              </li>
-            </ul>
-          </div>
-        </section>
+                <div class="form-group">
+                  <input type="time" id="appointmentTime" required />
+                  <input type="date" id="appointmentDate" required />
+                </div>
+                <button type="submit">Add Appointment</button>
+              </form>
+            </div>
 
-          <!-- Updated User Management Section -->
+            <!-- All Appointments -->
+            <div class="edit-users">
+              <h3>All Appointments</h3>
+              <ul class="user-list" id="all-appointments-list">
+                <!-- Will be populated by JavaScript -->
+              </ul>
+            </div>
+
+            <!-- Pending Appointments -->
+            <div class="edit-users">
+              <h3>Pending Appointments</h3>
+              <ul class="user-list" id="pending-appointments-list">
+                <!-- Will be populated by JavaScript -->
+              </ul>
+            </div>
+          </section>
+
+          <!-- User Management Section -->
           <section id="user management" class="tab">
             <h2>User Management</h2>
 
@@ -198,26 +180,16 @@
               </form>
             </div>
 
-            <!-- Spacer between sections -->
-            <div style="height: 2rem;"></div>
-
             <!-- Edit Users List -->
             <div class="edit-users">
-              <h3>Edit Users</h3>
-              <ul class="user-list">
-                <li class="user-item">
-                  <span>Juan Dela Cruz</span>
-                  <button class="edit-btn">Edit</button>
-                </li>
-                <li class="user-item">
-                  <span>Maria Santos</span>
-                  <button class="edit-btn">Edit</button>
-                </li>
-                <!-- Add more user items here -->
+              <h3>Users</h3>
+              <ul class="user-list" id="users-list">
+                <!-- Will be populated by JavaScript -->
               </ul>
             </div>
           </section>
 
+          <!-- Booking History Section -->
           <section id="booking-history" class="tab">
             <h2>Booking History</h2>
 
@@ -236,23 +208,24 @@
             <div class="edit-users" id="bookingList">
               <h3>Successful Bookings</h3>
               <ul class="user-list">
-                <li class="user-item" data-date="2025-05-27">
-                  <span>Maria Clara - Keepsake - May 27, 2025</span>
-                  <button class="edit-btn" onclick="printReceipt('Maria Clara', 'Keepsake', 'May 27, 2025')">Print Receipt</button>
-                </li>
-                <!-- Add more booking items here -->
+                <!-- Will be populated by JavaScript -->
               </ul>
             </div>
           </section>
 
+          <!-- Gallery Section -->
           <section id="gallery" class="tab">
             <h2>Gallery</h2>
-            <p>Gallery photos or uploads appear here.</p>
+            <div id="gallery-content">
+              <!-- Will be populated by JavaScript -->
+            </div>
           </section>
         </main>
       </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script-admin-dashboard.js"></script>
   </body>
 </html>
