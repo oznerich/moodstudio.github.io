@@ -38,12 +38,17 @@ function showTab(tabId, element) {
 // User Management Functions
 async function loadUsers() {
   try {
-    const { data: users, error } = await supabase
+    console.log('Attempting to load users...');
+    
+    const { data: users, error, status } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
+    console.log('Supabase response:', { status, error, users });
+
     if (error) throw error;
+    if (!users) throw new Error('No users returned');
 
     const userList = document.querySelector('#user management .user-list');
     userList.innerHTML = users.map(user => `
@@ -60,9 +65,11 @@ async function loadUsers() {
         </div>
       </li>
     `).join('');
+    
+    console.log('Users loaded successfully');
   } catch (error) {
     console.error('Error loading users:', error);
-    alert('Error loading users');
+    alert(`Error loading users: ${error.message}`);
   }
 }
 
