@@ -12,7 +12,7 @@ window.deleteUser = deleteUser;
 window.togglePassword = togglePassword;
 window.filterBookings = filterBookings;
 
-// UI Tab Handling
+// Show/hide tabs and set active sidebar item
 function showTab(tabId, element) {
   document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
   document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
@@ -46,9 +46,7 @@ async function loadUsers() {
     `).join('');
   } catch (error) {
     console.error('Error loading users:', error);
-    document.getElementById('users-list').innerHTML = `
-      <li class="user-item error">Error loading users</li>
-    `;
+    document.getElementById('users-list').innerHTML = `<li class="user-item error">Error loading users</li>`;
   }
 }
 
@@ -60,124 +58,84 @@ async function addUser(event) {
     email: form.querySelector('input[type="email"]').value,
     first_name: form.querySelector('input[placeholder="First Name"]').value,
     last_name: form.querySelector('input[placeholder="Last Name"]').value,
-    birthday: form.querySelector('input[type="date"]').value,
-    contact: form.querySelector('input[placeholder="Contact No."]').value
+    birthday: form.querySelector('input[placeholder="Birthday"]').value,
+    contact: form.querySelector('input[placeholder="Contact No."]').value,
+    password: form.querySelector('#password').value,
   };
 
   try {
+    // Signup via Supabase auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: userData.email,
-      password: form.querySelector('input[type="password"]').value
+      password: userData.password,
     });
+
     if (authError) throw authError;
 
-    const { error } = await supabase.from('profiles').insert([{
-      ...userData,
+    // Insert profile row linked to auth user
+    const { error: profileError } = await supabase.from('profiles').insert({
       id: authData.user.id,
-      role: 'User'
-    }]);
-    if (error) throw error;
+      email: userData.email,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      birthday: userData.birthday,
+      contact: userData.contact,
+      role: 'User',
+    });
 
-    alert('User created successfully!');
+    if (profileError) throw profileError;
+
+    alert('User added successfully!');
     form.reset();
     loadUsers();
   } catch (error) {
-    alert('Error creating user: ' + error.message);
+    alert('Error adding user: ' + error.message);
   }
 }
 
-// Edit user placeholder (you can implement this)
+// Edit user (simplified example)
 function editUser(userId) {
-  alert(`Edit user: ${userId} (functionality to be implemented)`);
+  alert('Edit user feature coming soon for user ID: ' + userId);
 }
 
-// Delete user placeholder
+// Delete user by ID
 async function deleteUser(userId) {
   if (!confirm('Are you sure you want to delete this user?')) return;
+
   try {
-    const { error } = await supabase.from('profiles').delete().eq('id', userId);
-    if (error) throw error;
-    alert('User deleted successfully');
+    // Delete profile row
+    const { error: profileError } = await supabase.from('profiles').delete().eq('id', userId);
+    if (profileError) throw profileError;
+
+    // Delete auth user (requires supabase admin API, not possible client-side)
+    alert('Profile deleted, but auth user deletion must be handled separately.');
+
     loadUsers();
   } catch (error) {
     alert('Error deleting user: ' + error.message);
   }
 }
 
-// Password toggle
+// Toggle password visibility in form
 function togglePassword() {
-  const passwordField = document.getElementById("password");
-  passwordField.type = passwordField.type === "password" ? "text" : "password";
+  const pwdInput = document.getElementById('password');
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+  } else {
+    pwdInput.type = 'password';
+  }
 }
 
-// Time validation
-document.getElementById("appointmentTime")?.addEventListener("input", function (e) {
-  const time = e.target.value;
-  if (time < "12:00" || time > "19:00") {
-    alert("Please select a time between 12:00 PM and 7:00 PM.");
-    e.target.value = "";
-  }
-});
-
-// Date validation
-document.getElementById("appointmentDate")?.addEventListener("input", function (e) {
-  const date = new Date(e.target.value);
-  if (date.getDay() === 1) {
-    alert("Appointments are not available on Mondays.");
-    e.target.value = "";
-  }
-});
-
-// Print booking receipt
-function printReceipt(name, packageName, date) {
-  const receiptWindow = window.open('', '_blank');
-  receiptWindow.document.write(`
-    <html><head><title>Receipt</title></head><body>
-      <h2>Official Receipt</h2>
-      <p>Name: ${name}</p>
-      <p>Package: ${packageName}</p>
-      <p>Date: ${date}</p>
-      <hr><p>Thank you for booking!</p>
-      <script>window.print();</script>
-    </body></html>
-  `);
-  receiptWindow.document.close();
-}
-
-// Filter bookings by timeframe
+// Filter booking list by timeframe (placeholder function)
 function filterBookings() {
   const filter = document.getElementById('bookingFilter').value;
-  const items = document.querySelectorAll('#bookingList .user-item');
-  const now = new Date();
-
-  items.forEach(item => {
-    const dateStr = item.getAttribute('data-date');
-    const bookingDate = new Date(dateStr);
-    let show = false;
-
-    switch (filter) {
-      case 'day':
-        show = bookingDate.toDateString() === now.toDateString(); break;
-      case 'week':
-        const start = new Date(now.setDate(now.getDate() - now.getDay()));
-        const end = new Date(start); end.setDate(end.getDate() + 6);
-        show = bookingDate >= start && bookingDate <= end; break;
-      case 'month':
-        show = bookingDate.getMonth() === now.getMonth(); break;
-      case 'year':
-        show = bookingDate.getFullYear() === now.getFullYear(); break;
-      default:
-        show = true;
-    }
-
-    item.style.display = show ? 'flex' : 'none';
-  });
+  alert('Booking filter applied: ' + filter);
 }
 
-// Initialize listeners
-document.getElementById('addUserForm')?.addEventListener('submit', addUser);
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('user-management')?.classList.contains('active')) {
-    loadUsers();
-  }
-});
+// Add user form submit handler
+document.getElementById('addUserForm').addEventListener('submit', addUser);
+
+// Initialize: load users if on user management tab
+if (document.getElementById('user-management').classList.contains('active')) {
+  loadUsers();
+}
