@@ -5,6 +5,10 @@ const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Edit mode state
+let isEditing = false;
+let editingUserId = null;
+
 // Make functions global so onclick handlers in HTML can find them
 window.showTab = showTab;
 window.editUser = editUser;
@@ -50,52 +54,40 @@ async function loadUsers() {
   }
 }
 
-// Add new user (auth + profile)
-async function addUser(event) {
-  event.preventDefault();
-  const form = event.target;
-  const userData = {
-    email: form.querySelector('input[type="email"]').value,
-    first_name: form.querySelector('input[placeholder="First Name"]').value,
-    last_name: form.querySelector('input[placeholder="Last Name"]').value,
-    birthday: form.querySelector('input[placeholder="Birthday"]').value,
-    contact: form.querySelector('input[placeholder="Contact No."]').value,
-    password: form.querySelector('#password').value,
-  };
-
+// Edit user (loads user data into the form for editing)
+async function editUser(userId) {
   try {
-    // Signup via Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
-    });
+    const { data: user, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (authError) throw authError;
+    if (error) throw error;
 
-    // Insert profile row linked to auth user
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: authData.user.id,
-      email: userData.email,
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      birthday: userData.birthday,
-      contact: userData.contact,
-      role: 'User',
-    });
+    // Fill form with user data
+    const form = document.getElementById('addUserForm');
+    form.querySelector('input[placeholder="First Name"]').value = user.first_name || '';
+    form.querySelector('input[placeholder="Last Name"]').value = user.last_name || '';
+    form.querySelector('input[placeholder="Birthday"]').value = user.birthday || '';
+    form.querySelector('input[placeholder="Contact No."]').value = user.contact || '';
+    form.querySelector('input[type="email"]').value = user.email || '';
 
-    if (profileError) throw profileError;
+    // Password left blank on edit for security
+    form.querySelector('#password').value = '';
 
-    alert('User added successfully!');
-    form.reset();
-    loadUsers();
+    // Change button text to "Update User"
+    form.querySelector('button[type="submit"]').textContent = 'Update User';
+
+    // Show cancel button
+    cancelEditBtn.style.display = 'inline-block';
+
+    // Set edit mode state
+    isEditing = true;
+    editingUserId = userId;
   } catch (error) {
-    alert('Error adding user: ' + error.message);
+    alert('Error loading user data: ' + error.message);
   }
-}
-
-// Edit user (simplified example)
-function editUser(userId) {
-  alert('Edit user feature coming soon for user ID: ' + userId);
 }
 
 // Delete user by ID
@@ -107,7 +99,7 @@ async function deleteUser(userId) {
     const { error: profileError } = await supabase.from('profiles').delete().eq('id', userId);
     if (profileError) throw profileError;
 
-    // Delete auth user (requires supabase admin API, not possible client-side)
+    // Note: Deleting auth user requires admin privileges; handle separately
     alert('Profile deleted, but auth user deletion must be handled separately.');
 
     loadUsers();
@@ -119,23 +111,108 @@ async function deleteUser(userId) {
 // Toggle password visibility in form
 function togglePassword() {
   const pwdInput = document.getElementById('password');
-  if (pwdInput.type === 'password') {
-    pwdInput.type = 'text';
-  } else {
-    pwdInput.type = 'password';
-  }
+  pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
 }
 
-// Filter booking list by timeframe (placeholder function)
+// Filter booking list by timeframe (placeholder)
 function filterBookings() {
   const filter = document.getElementById('bookingFilter').value;
   alert('Booking filter applied: ' + filter);
 }
 
-// Add user form submit handler
-document.getElementById('addUserForm').addEventListener('submit', addUser);
+// Handle Add/Edit User form submission
+async function handleUserFormSubmit(event) {
+  event.preventDefault();
+  const form = event.target;
 
-// Initialize: load users if on user management tab
+  const userData = {
+    email: form.querySelector('input[type="email"]').value,
+    first_name: form.querySelector('input[placeholder="First Name"]').value,
+    last_name: form.querySelector('input[placeholder="Last Name"]').value,
+    birthday: form.querySelector('input[placeholder="Birthday"]').value,
+    contact: form.querySelector('input[placeholder="Contact No."]').value,
+    password: form.querySelector('#password').value,
+  };
+
+  try {
+    if (isEditing && editingUserId) {
+      // UPDATE user profile (email and password not updated here)
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          birthday: userData.birthday,
+          contact: userData.contact,
+        })
+        .eq('id', editingUserId);
+
+      if (updateError) throw updateError;
+
+      alert('User updated successfully!');
+
+      // Reset form & edit state
+      form.reset();
+      form.querySelector('button[type="submit"]').textContent = 'Add User';
+      cancelEditBtn.style.display = 'none';
+      isEditing = false;
+      editingUserId = null;
+
+      loadUsers();
+    } else {
+      // ADD new user via auth signup + profile insert
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      if (authError) throw authError;
+
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: authData.user.id,
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        birthday: userData.birthday,
+        contact: userData.contact,
+        role: 'User',
+      });
+
+      if (profileError) throw profileError;
+
+      alert('User added successfully!');
+      form.reset();
+      loadUsers();
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+// Cancel edit button logic
+const cancelEditBtn = document.createElement('button');
+cancelEditBtn.type = 'button';
+cancelEditBtn.textContent = 'Cancel';
+cancelEditBtn.style.display = 'none';
+cancelEditBtn.style.marginLeft = '10px';
+
+// Insert cancel button next to the submit button inside addUserForm
+const formButtonsContainer = document.querySelector('#addUserForm button[type="submit"]').parentNode;
+formButtonsContainer.appendChild(cancelEditBtn);
+
+cancelEditBtn.addEventListener('click', () => {
+  const form = document.getElementById('addUserForm');
+  form.reset();
+  form.querySelector('button[type="submit"]').textContent = 'Add User';
+  cancelEditBtn.style.display = 'none';
+  isEditing = false;
+  editingUserId = null;
+});
+
+// Hook form submit
+document.getElementById('addUserForm').addEventListener('submit', handleUserFormSubmit);
+
+// Initial load users if user-management tab active
 if (document.getElementById('user-management').classList.contains('active')) {
   loadUsers();
 }
