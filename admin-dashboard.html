@@ -8,25 +8,32 @@
   </head>
   <body>
     <div class="dashboard-container">
-      <!-- Header -->
       <header class="dashboard-header">
         <h1>Mood Studios</h1>
         <a href="index.html" class="logout">Logout</a>
       </header>
 
       <div class="dashboard-content">
-        <!-- Sidebar -->
         <aside class="sidebar">
           <ul>
-            <li class="sidebar-item active" onclick="showTab('dashboard', this)">Dashboard</li>
-            <li class="sidebar-item" onclick="showTab('appointments', this)">Appointments</li>
-            <li class="sidebar-item" onclick="showTab('booking-history', this)">Booking History</li>
-            <li class="sidebar-item" onclick="showTab('user-management', this)">User Management</li>
-            <li class="sidebar-item" onclick="showTab('gallery', this)">Gallery</li>
+            <li class="sidebar-item active" onclick="showTab('dashboard', this)">
+              Dashboard
+            </li>
+            <li class="sidebar-item" onclick="showTab('appointments', this)">
+              Appointments
+            </li>
+            <li class="sidebar-item" onclick="showTab('booking-history', this)">
+              Booking History
+            </li>
+            <li class="sidebar-item" onclick="showTab('user-management', this)">
+              User Management
+            </li>
+            <li class="sidebar-item" onclick="showTab('gallery', this)">
+              Gallery
+            </li>
           </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
           <section id="dashboard" class="tab active">
             <h2>Welcome to your Dashboard!</h2>
@@ -34,15 +41,15 @@
               <div class="form-group dashboard-spacing">
                 <div class="edit-users">
                   <h5>New Bookings</h5>
-                  <p>35</p>
+                  <p id="new-bookings">0</p>
                 </div>
                 <div class="edit-users">
                   <h5>Refund Bookings</h5>
-                  <p>5</p>
+                  <p id="refund-bookings">0</p>
                 </div>
                 <div class="edit-users">
                   <h5>User Queue</h5>
-                  <p>12</p>
+                  <p id="user-queue">0</p>
                 </div>
               </div>
             </div>
@@ -50,7 +57,7 @@
             <div class="edit-users">
               <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="flex: 1; color: #007bff; margin: 0;">Booking Analytics</h3>
-                <select>
+                <select id="analytics-timeframe">
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
@@ -60,11 +67,11 @@
               <div class="form-group dashboard-spacing">
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Total Bookings</h5>
-                  <p>120</p>
+                  <p id="total-bookings">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Reviews</h5>
-                  <p>88</p>
+                  <p id="reviews-count">0</p>
                 </div>
               </div>
             </div>
@@ -72,7 +79,7 @@
             <div class="edit-users">
               <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="flex: 1; color: #007bff; margin: 0;">Availed Package</h3>
-                <select>
+                <select id="package-timeframe">
                   <option value="day">Day</option>
                   <option value="week">Week</option>
                   <option value="month">Month</option>
@@ -82,15 +89,15 @@
               <div class="form-group dashboard-spacing">
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Keepsake</h5>
-                  <p>45</p>
+                  <p id="keepsake-count">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Euphoria</h5>
-                  <p>30</p>
+                  <p id="euphoria-count">0</p>
                 </div>
                 <div class="edit-users" style="flex: 1; color: #555555;">
                   <h5>Serendipity</h5>
-                  <p>25</p>
+                  <p id="serendipity-count">0</p>
                 </div>
               </div>
             </div>
@@ -126,28 +133,12 @@
 
             <div class="edit-users">
               <h3>All Appointments</h3>
-              <ul class="user-list">
-                <li class="user-item">
-                  <span>John Doe - Keepsake</span>
-                  <div>
-                    <button class="edit-btn">Edit</button>
-                    <button class="edit-btn" style="background-color:#dc3545">Delete</button>
-                  </div>
-                </li>
-              </ul>
+              <ul class="user-list" id="all-appointments"></ul>
             </div>
 
             <div class="edit-users">
               <h3>Pending Appointments</h3>
-              <ul class="user-list">
-                <li class="user-item">
-                  <span>Jane Smith - Euphoria</span>
-                  <div>
-                    <button class="edit-btn">Accept</button>
-                    <button class="edit-btn" style="background-color:#dc3545">Decline</button>
-                  </div>
-                </li>
-              </ul>
+              <ul class="user-list" id="pending-appointments"></ul>
             </div>
           </section>
 
@@ -178,8 +169,8 @@
             <div style="height: 2rem;"></div>
 
             <div class="edit-users">
-              <h3>Edit Users</h3>
-              <ul class="user-list"></ul>
+              <h3>Users</h3>
+              <ul class="user-list" id="users-list"></ul>
             </div>
           </section>
 
@@ -199,23 +190,19 @@
 
             <div class="edit-users" id="bookingList">
               <h3>Successful Bookings</h3>
-              <ul class="user-list">
-                <li class="user-item" data-date="2025-05-27">
-                  <span>Maria Clara - Keepsake - May 27, 2025</span>
-                  <button class="edit-btn" onclick="printReceipt('Maria Clara', 'Keepsake', 'May 27, 2025')">Print Receipt</button>
-                </li>
-              </ul>
+              <ul class="user-list" id="bookings-list"></ul>
             </div>
           </section>
 
           <section id="gallery" class="tab">
             <h2>Gallery</h2>
-            <p>Gallery photos or uploads appear here.</p>
+            <div id="gallery-content"></div>
           </section>
         </main>
       </div>
     </div>
 
-    <script src="script-admin-dashboard.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script-admin-dashboard.js"></script>
   </body>
 </html>
