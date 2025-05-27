@@ -38,26 +38,35 @@ function showTab(tabId, element) {
 // User Management Functions
 async function loadUsers() {
   try {
-    console.log('Attempting to load users...');
+    console.log('Loading users from Supabase...');
     
     const { data: users, error, status } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, email, first_name, last_name, role, contact, birthday, created_at')
       .order('created_at', { ascending: false });
 
-    console.log('Supabase response:', { status, error, users });
+    console.log('Supabase response status:', status);
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
 
-    if (error) throw error;
-    if (!users) throw new Error('No users returned');
+    if (!users || users.length === 0) {
+      console.warn('No users found in database');
+      const userList = document.querySelector('#user management .user-list');
+      userList.innerHTML = '<li class="user-item">No users found</li>';
+      return;
+    }
 
     const userList = document.querySelector('#user management .user-list');
     userList.innerHTML = users.map(user => `
       <li class="user-item" data-id="${user.id}">
         <span>
-          ${user.first_name} ${user.last_name} 
+          ${user.first_name || ''} ${user.last_name || ''} 
           <small>(${user.email})</small>
           <br>
-          <small>Role: ${user.role} | Contact: ${user.contact}</small>
+          <small>Role: ${user.role} | Contact: ${user.contact || 'N/A'}</small>
         </span>
         <div>
           <button class="edit-btn" onclick="editUser('${user.id}')">Edit</button>
@@ -66,10 +75,14 @@ async function loadUsers() {
       </li>
     `).join('');
     
-    console.log('Users loaded successfully');
+    console.log('Successfully loaded', users.length, 'users');
   } catch (error) {
-    console.error('Error loading users:', error);
-    alert(`Error loading users: ${error.message}`);
+    console.error('Error in loadUsers:', error);
+    alert(`Failed to load users: ${error.message}`);
+    
+    // Show error in UI
+    const userList = document.querySelector('#user management .user-list');
+    userList.innerHTML = `<li class="user-item error">Error loading users: ${error.message}</li>`;
   }
 }
 
