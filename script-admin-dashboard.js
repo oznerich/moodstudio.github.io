@@ -1,7 +1,10 @@
-// Initialize Supabase - REPLACE THESE WITH YOUR ACTUAL CREDENTIALS
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = "https://rdgahcjjbewvyqcfdtih.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Tab Management
 function showTab(tabId, element) {
