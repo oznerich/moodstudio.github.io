@@ -99,12 +99,12 @@
               <h3>Add Appointment</h3>
               <form id="addAppointmentForm">
                 <div class="form-group">
-                  <input type="text" placeholder="Full Name" required />
-                  <input type="tel" placeholder="Phone Number" required />
+                  <input type="text" id="fullName" placeholder="Full Name" required />
+                  <input type="tel" id="phone" placeholder="Phone Number" required />
                 </div>
                 <div class="form-group">
-                  <input type="email" placeholder="Email" required />
-                  <select required>
+                  <input type="email" id="email" placeholder="Email" required />
+                  <select id="package" required>
                     <option value="">Select Package</option>
                     <option value="keepsake">Keepsake</option>
                     <option value="serendipity">Serendipity</option>
@@ -114,6 +114,10 @@
                 <div class="form-group">
                   <input type="time" id="appointmentTime" required />
                   <input type="date" id="appointmentDate" required />
+                </div>
+                <div class="form-group">
+                  <label for="appointmentImage">Upload Image (optional):</label>
+                  <input type="file" id="appointmentImage" accept="image/*" />
                 </div>
                 <button type="submit">Add Appointment</button>
               </form>
