@@ -1,14 +1,30 @@
-// Your existing imports and code here...
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ... Your existing functions ...
+// ------------------
+// TAB SWITCHING FUNCTION
+// ------------------
+function showTab(tabId, element) {
+  // Hide all tabs
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  // Show selected tab
+  document.getElementById(tabId).classList.add('active');
+
+  // Remove active class on all sidebar items
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+  // Add active class to clicked sidebar item
+  element.classList.add('active');
+}
+
+// Expose to global so inline onclick works
+window.showTab = showTab;
 
 // ---------------------------
-// NEW: Appointment Form Handling + Gallery
+// APPOINTMENTS AND GALLERY HANDLING
 // ---------------------------
 
 const addAppointmentForm = document.getElementById('addAppointmentForm');
@@ -16,7 +32,6 @@ const allAppointmentsList = document.getElementById('all-appointments');
 const pendingAppointmentsList = document.getElementById('pending-appointments');
 const galleryContent = document.getElementById('gallery-content');
 
-// Listen for appointment form submission
 addAppointmentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -44,7 +59,7 @@ addAppointmentForm.addEventListener('submit', async (e) => {
       const filePath = `appointments/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('user-uploads')  // Make sure you have a storage bucket called 'user-uploads'
+        .from('user-uploads')  // Make sure this bucket exists
         .upload(filePath, imageFile);
 
       if (uploadError) throw uploadError;
@@ -54,7 +69,7 @@ addAppointmentForm.addEventListener('submit', async (e) => {
       imageUrl = publicUrlData.publicUrl;
     }
 
-    // Insert appointment record
+    // Insert new appointment
     const { error: insertError } = await supabase.from('appointments').insert({
       full_name: fullName,
       phone: phone,
@@ -63,7 +78,7 @@ addAppointmentForm.addEventListener('submit', async (e) => {
       appointment_time: appointmentTime,
       appointment_date: appointmentDate,
       image_url: imageUrl,
-      status: 'pending', // default status
+      status: 'pending',
     });
 
     if (insertError) throw insertError;
@@ -71,15 +86,16 @@ addAppointmentForm.addEventListener('submit', async (e) => {
     alert('Appointment added successfully!');
     addAppointmentForm.reset();
 
-    loadAppointments();   // Refresh lists
-    loadGalleryImages();  // Refresh gallery in case image uploaded
+    await loadAppointments();
+    await loadGalleryImages();
 
   } catch (error) {
     alert('Error adding appointment: ' + error.message);
+    console.error('Add appointment error:', error);
   }
 });
 
-// Load all appointments and pending appointments
+// Load all appointments and pending ones
 async function loadAppointments() {
   try {
     const { data: appointments, error } = await supabase
@@ -90,7 +106,6 @@ async function loadAppointments() {
 
     if (error) throw error;
 
-    // All appointments
     allAppointmentsList.innerHTML = appointments.map(app => `
       <li>
         <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date} ${app.appointment_time} | Status: ${app.status}
@@ -98,7 +113,6 @@ async function loadAppointments() {
       </li>
     `).join('');
 
-    // Pending appointments only
     const pending = appointments.filter(a => a.status === 'pending');
     pendingAppointmentsList.innerHTML = pending.length
       ? pending.map(app => `
@@ -116,10 +130,9 @@ async function loadAppointments() {
   }
 }
 
-// Load images from storage bucket for gallery
+// Load images for gallery from storage
 async function loadGalleryImages() {
   try {
-    // List files from 'user-uploads/appointments' folder
     const { data: files, error } = await supabase.storage
       .from('user-uploads')
       .list('appointments', { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } });
@@ -131,12 +144,10 @@ async function loadGalleryImages() {
       return;
     }
 
-    // Create HTML for images
-    const imagesHtml = await Promise.all(files.map(async (file) => {
-      // Get public URL for each image
+    const imagesHtml = files.map(file => {
       const { data: publicUrlData } = supabase.storage.from('user-uploads').getPublicUrl(`appointments/${file.name}`);
       return `<img src="${publicUrlData.publicUrl}" alt="${file.name}" style="max-width:150px; margin: 5px; border-radius: 4px; object-fit: cover;" />`;
-    }));
+    });
 
     galleryContent.innerHTML = imagesHtml.join('');
 
@@ -146,6 +157,6 @@ async function loadGalleryImages() {
   }
 }
 
-// On initial load, load appointments and gallery if those tabs are active or in general
+// INITIAL LOAD
 loadAppointments();
 loadGalleryImages();
