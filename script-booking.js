@@ -90,15 +90,9 @@ window.submitBooking = async function() {
   if (error) {
     alert("Error booking: " + error.message);
   } else {
-    alert("Booking successful! We'll be in touch.");
-    document.getElementById('first-name').value = '';
-    document.getElementById('last-name').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('date-picker').value = '';
-    document.getElementById('time-buttons').innerHTML = '';
-    selectedPackage = { name: '', imageUrl: '' };
-    selectedTime = '';
-    document.querySelector('.booking-form').style.display = 'none';
+  alert("Booking successful! Redirecting you to the main page...");
+  setTimeout(() => {
+    window.location.href = "user-mainpage.html"; // Redirects after 1.5 seconds
+  }, 1500);
   }
 };
