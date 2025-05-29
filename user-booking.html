@@ -2,105 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Photography Studio Booking</title>
-  <link rel="stylesheet" href="style-booking.css" />
-  <style>
-    .gcash-qr {
-      display: none;
-      margin: 20px auto;
-      text-align: center;
-    }
-    .gcash-qr img {
-      max-width: 200px;
-      margin-top: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script type="module" src="script-booking.js"></script>
 </head>
 <body>
+  <h1>Book Your Photography Session</h1>
 
-  <section id="packages" class="container">
-    <h2>Select a Package</h2>
-    <div id="image-preview">Preview will show here</div>
-
-    <div class="package-category">
-      <div class="dropdown">
-        <div class="dropdown-header" onclick="toggleDropdown(this)">Self-shoot Session</div>
-        <div class="dropdown-content hidden">
-          <div class="package-item" onclick="selectPackage('self1.jpg', 'Selfie Package A')">
-            <img src="self1.jpg" alt="Self Shoot 1">
-            <div class="package-details">
-              <strong>Selfie Package A</strong>
-              <div class="package-meta"><span>30 mins</span><span>₱1000</span></div>
-              <p>Perfect for solo portraits.</p>
-            </div>
-            <div class="package-arrow" onclick="nextSection('dateTime')">&rarr;</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dropdown">
-        <div class="dropdown-header" onclick="toggleDropdown(this)">With Photographer</div>
-        <div class="dropdown-content hidden">
-          <div class="package-item" onclick="selectPackage('photo1.jpg', 'Portrait Session')">
-            <img src="photo1.jpg" alt="Photographer Package">
-            <div class="package-details">
-              <strong>Portrait Session</strong>
-              <div class="package-meta"><span>1 hour</span><span>₱1500</span></div>
-              <p>Guided shoot with professional photographer.</p>
-            </div>
-            <div class="package-arrow" onclick="nextSection('dateTime')">&rarr;</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dropdown">
-        <div class="dropdown-header" onclick="toggleDropdown(this)">Studio Rental</div>
-        <div class="dropdown-content hidden">
-          <div class="package-item" onclick="selectPackage('studio1.jpg', 'Studio Only')">
-            <img src="studio1.jpg" alt="Studio Rental">
-            <div class="package-details">
-              <strong>Studio Only</strong>
-              <div class="package-meta"><span>2 hours</span><span>₱2000</span></div>
-              <p>Use our studio with your own gear.</p>
-            </div>
-            <div class="package-arrow" onclick="nextSection('dateTime')">&rarr;</div>
-          </div>
-        </div>
-      </div>
+  <section>
+    <h2>Select Package</h2>
+    <div class="packages">
+      <button onclick="selectPackage('images/basic.jpg', 'Basic Package', 500)">Basic Package - ₱500</button>
+      <button onclick="selectPackage('images/premium.jpg', 'Premium Package', 1000)">Premium Package - ₱1000</button>
+      <button onclick="selectPackage('images/deluxe.jpg', 'Deluxe Package', 1500)">Deluxe Package - ₱1500</button>
     </div>
+    <div id="image-preview" style="margin-top: 10px; height: 200px;"></div>
   </section>
 
-  <section id="dateTime" class="container date-time">
-    <h2>Select Date & Time</h2>
-    <input type="date" id="date-picker" min="" onchange="showTimes()" />
-    <div class="time-buttons" id="time-buttons"></div>
+  <section class="date-time" style="display:none;">
+    <h2>Choose Date and Time</h2>
+    <input type="date" id="date-picker" onchange="showTimes()" />
+    <div id="time-buttons" style="margin-top: 10px;"></div>
   </section>
 
-  <section id="bookingForm" class="container booking-form">
-    <h2>Request Booking</h2>
-    <div class="form-group"><input id="first-name" type="text" placeholder="First Name *" required></div>
-    <div class="form-group"><input id="last-name" type="text" placeholder="Last Name"></div>
-    <div class="form-group"><input id="email" type="email" placeholder="Email *" required></div>
-    <div class="form-group"><input id="phone" type="tel" placeholder="Phone Number *" required></div>
+  <section class="booking-form" style="display:none;">
+    <h2>Your Details</h2>
+    <form id="bookingForm" onsubmit="event.preventDefault(); startPayment();">
+      <div class="form-group">
+        <label for="first-name">First Name*</label>
+        <input type="text" id="first-name" required />
+      </div>
+      <div class="form-group">
+        <label for="last-name">Last Name</label>
+        <input type="text" id="last-name" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email*</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone*</label>
+        <input type="tel" id="phone" required />
+      </div>
 
-    <div class="form-group">
-      <label for="payment-method">Payment Method *</label>
-      <select id="payment-method" required onchange="toggleGcashQR(this.value)">
-        <option value="">-- Choose --</option>
-        <option value="GCash">GCash</option>
-        <option value="Cash On-Site">Cash On-Site</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="promo-code">Promo Code (optional)</label>
+        <input id="promo-code" type="text" placeholder="Enter promo code" oninput="applyPromo()" />
+      </div>
 
-    <div class="gcash-qr" id="gcash-qr">
-      <p>Scan the QR code to simulate GCash payment:</p>
-      <img src="gcash-placeholder-qr.png" alt="GCash QR Code">
-    </div>
+      <div class="form-group">
+        <strong>Total Price: <span id="total-price">₱0.00</span></strong>
+      </div>
 
-    <button class="submit-btn" onclick="startPayment()">Pay & Confirm Booking</button>
+      <div class="form-group">
+        <label for="payment-method">Payment Method*</label>
+        <select id="payment-method" required onchange="toggleGcashQR(this.value)">
+          <option value="">Select payment method</option>
+          <option value="GCash">GCash</option>
+          <option value="Cash">Cash</option>
+        </select>
+      </div>
+
+      <div id="gcash-qr" style="display:none; margin-bottom: 10px;">
+        <img src="images/gcash-qr.png" alt="GCash QR Code" style="max-width:150px;" />
+        <p>Scan this QR code to pay using GCash.</p>
+      </div>
+
+      <button type="submit">Confirm Booking</button>
+    </form>
   </section>
-
-  <script type="module" src="script-booking.js"></script>
 </body>
 </html>
