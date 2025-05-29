@@ -8,15 +8,17 @@
   body { font-family: Arial, sans-serif; margin: 0; }
   .dashboard-container { display: flex; height: 100vh; }
   .sidebar { width: 200px; background: #222; color: white; padding: 20px; }
-  .sidebar ul { list-style: none; padding: 0; }
-  .sidebar-item { padding: 10px; cursor: pointer; }
+  .sidebar ul { list-style: none; padding: 0; margin: 0; }
+  .sidebar-item { padding: 10px; cursor: pointer; user-select: none; }
   .sidebar-item.active { background: #007bff; font-weight: bold; }
   .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
   .tab { display: none; }
   .tab.active { display: block; }
-  button { margin-left: 10px; }
+  button { margin-left: 10px; cursor: pointer; }
   form > div { margin-bottom: 10px; }
-  img { margin: 5px; border-radius: 8px; }
+  img { margin: 5px; border-radius: 8px; max-width: 150px; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 8px; }
 </style>
 </head>
 <body>
