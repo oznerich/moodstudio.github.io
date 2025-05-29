@@ -1,106 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="style-dashboard.css" />
-    <style>
-      .tab { display: none; }
-      .tab.active { display: block; }
-      .sidebar-item.active { font-weight: bold; }
-      img { margin: 5px; border-radius: 8px; }
-    </style>
-  </head>
-  <body>
-    <div class="dashboard-container">
-      <header class="dashboard-header">
-        <h1>Mood Studios</h1>
-        <a href="index.html" class="logout">Logout</a>
-      </header>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; }
+  .dashboard-container { display: flex; height: 100vh; }
+  .sidebar { width: 200px; background: #222; color: white; padding: 20px; }
+  .sidebar ul { list-style: none; padding: 0; }
+  .sidebar-item { padding: 10px; cursor: pointer; }
+  .sidebar-item.active { background: #007bff; font-weight: bold; }
+  .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  button { margin-left: 10px; }
+  form > div { margin-bottom: 10px; }
+  img { margin: 5px; border-radius: 8px; }
+</style>
+</head>
+<body>
 
-      <div class="dashboard-content">
-        <aside class="sidebar">
-          <ul>
-            <li class="sidebar-item active" onclick="showTab('dashboard', this)">Dashboard</li>
-            <li class="sidebar-item" onclick="showTab('appointments', this)">Appointments</li>
-            <li class="sidebar-item" onclick="showTab('booking-history', this)">Booking History</li>
-            <li class="sidebar-item" onclick="showTab('user-management', this)">User Management</li>
-            <li class="sidebar-item" onclick="showTab('gallery', this)">Gallery</li>
-          </ul>
-        </aside>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <ul>
+      <li class="sidebar-item active" data-tab="dashboard">Dashboard</li>
+      <li class="sidebar-item" data-tab="appointments">Appointments</li>
+      <li class="sidebar-item" data-tab="booking-history">Booking History</li>
+      <li class="sidebar-item" data-tab="user-management">User Management</li>
+      <li class="sidebar-item" data-tab="gallery">Gallery</li>
+    </ul>
+  </aside>
 
-        <main class="main-content">
-          <section id="dashboard" class="tab active">
-            <h2>Welcome to your Dashboard!</h2>
-            <div class="form-group dashboard-spacing">
-              <div class="edit-users">
-                <h5>New Bookings</h5>
-                <p id="new-bookings">0</p>
-              </div>
-              <div class="edit-users">
-                <h5>Refund Bookings</h5>
-                <p id="refund-bookings">0</p>
-              </div>
-              <div class="edit-users">
-                <h5>User Queue</h5>
-                <p id="user-queue">0</p>
-              </div>
-            </div>
+  <main class="main-content">
+    <section id="dashboard" class="tab active">
+      <h2>Dashboard</h2>
+      <p><strong>Insights:</strong> <span id="ai-insights">Loading...</span></p>
+    </section>
 
-            <h3 style="color: #007bff;">AI-Powered Analytics</h3>
-            <div class="form-group">
-              <p><strong>Insights:</strong> <span id="ai-insights">Loading...</span></p>
-            </div>
-          </section>
+    <section id="appointments" class="tab">
+      <h2>Appointments</h2>
+      <form id="addAppointmentForm">
+        <div>
+          <input type="text" id="fullName" placeholder="Full Name" required />
+          <input type="tel" id="phone" placeholder="Phone Number" required />
+          <input type="email" id="email" placeholder="Email" required />
+        </div>
+        <div>
+          <select id="package" required>
+            <option value="">Select Package</option>
+            <option value="keepsake">Keepsake</option>
+            <option value="serendipity">Serendipity</option>
+            <option value="euphoria">Euphoria</option>
+          </select>
+          <input type="time" id="appointmentTime" required />
+          <input type="date" id="appointmentDate" required />
+        </div>
+        <button type="submit">Add Appointment</button>
+      </form>
+      <ul id="all-appointments"></ul>
+    </section>
 
-          <section id="appointments" class="tab">
-            <h2>Your Appointments</h2>
-            <form id="addAppointmentForm">
-              <div class="form-group">
-                <input type="text" id="fullName" placeholder="Full Name" required />
-                <input type="tel" id="phone" placeholder="Phone Number" required />
-                <input type="email" id="email" placeholder="Email" required />
-                <select id="package" required>
-                  <option value="">Select Package</option>
-                  <option value="keepsake">Keepsake</option>
-                  <option value="serendipity">Serendipity</option>
-                  <option value="euphoria">Euphoria</option>
-                </select>
-                <input type="time" id="appointmentTime" required />
-                <input type="date" id="appointmentDate" required />
-              </div>
-              <button type="submit">Add Appointment</button>
-            </form>
-            <ul id="all-appointments"></ul>
-          </section>
+    <section id="booking-history" class="tab">
+      <h2>Booking History</h2>
+      <ul id="bookings-list"></ul>
+    </section>
 
-          <section id="user-management" class="tab">
-            <h2>User Management</h2>
-            <form id="addUserForm">
-              <div class="form-group">
-                <input type="text" id="firstName" placeholder="First Name" required />
-                <input type="text" id="lastName" placeholder="Last Name" required />
-                <input type="email" id="userEmail" placeholder="Email" required />
-              </div>
-              <button type="submit">Add User</button>
-            </form>
-            <ul id="users-list"></ul>
-          </section>
+    <section id="user-management" class="tab">
+      <h2>User Management</h2>
+      <form id="addUserForm">
+        <div>
+          <input type="text" id="firstName" placeholder="First Name" required />
+          <input type="text" id="lastName" placeholder="Last Name" required />
+          <input type="email" id="userEmail" placeholder="Email" required />
+        </div>
+        <button type="submit">Add User</button>
+      </form>
+      <ul id="users-list"></ul>
+    </section>
 
-          <section id="booking-history" class="tab">
-            <h2>Booking History</h2>
-            <ul id="bookings-list"></ul>
-          </section>
+    <section id="gallery" class="tab">
+      <h2>Gallery</h2>
+      <div id="gallery-content"></div>
+    </section>
+  </main>
+</div>
 
-          <section id="gallery" class="tab">
-            <h2>Gallery</h2>
-            <div id="gallery-content"></div>
-          </section>
-        </main>
-      </div>
-    </div>
-
-    <script type="module" src="script-dashboard.js"></script>
-  </body>
+<script type="module" src="./script-dashboard.js"></script>
+</body>
 </html>
