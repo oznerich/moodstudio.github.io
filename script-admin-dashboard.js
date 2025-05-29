@@ -102,70 +102,176 @@ async function countBookingsByPackage(packageName) {
 // APPOINTMENTS
 //
 
+//
+// APPOINTMENTS
+//
+
 async function loadAppointments() {
   try {
-    const { data: allAppointments, error } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
+    const { data: allAppointments, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
+
     if (error) throw error;
 
     const allAppointmentsList = document.getElementById('all-appointments');
-    const pendingAppointmentsList = document.getElementById('pending-appointments');
-
     allAppointmentsList.innerHTML = '';
-    pendingAppointmentsList.innerHTML = '';
 
     allAppointments.forEach(appointment => {
       const li = document.createElement('li');
-      li.textContent = `${appointment.full_name} - ${appointment.package} on ${appointment.date} at ${appointment.time} (${appointment.status ?? 'pending'})`;
-
+      li.className = 'user-item';
+      li.dataset.id = appointment.id;
+      
+      li.innerHTML = `
+        <div class="appointment-info">
+          <strong>${appointment.first_name} ${appointment.last_name || ''}</strong>
+          <div>${appointment.email} | ${appointment.phone}</div>
+          <div>${appointment.package_name} on ${appointment.date} at ${appointment.time}</div>
+          <div>Status: ${appointment.payment_status} | $${appointment.total_price || '0'}</div>
+        </div>
+        <div class="appointment-actions">
+          <select class="status-select" onchange="updateAppointmentStatus('${appointment.id}', this.value)">
+            <option value="Pending" ${appointment.payment_status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Paid" ${appointment.payment_status === 'Paid' ? 'selected' : ''}>Paid</option>
+            <option value="Cancelled" ${appointment.payment_status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+          <button class="edit-btn" onclick="editAppointment('${appointment.id}')">Edit</button>
+          <button class="edit-btn" style="background-color:#dc3545" onclick="deleteAppointment('${appointment.id}')">Delete</button>
+        </div>
+      `;
+      
       allAppointmentsList.appendChild(li);
-
-      if ((appointment.status ?? 'pending') === 'pending') {
-        const pendingLi = li.cloneNode(true);
-        pendingAppointmentsList.appendChild(pendingLi);
-      }
     });
   } catch (error) {
     console.error('Error loading appointments:', error);
   }
 }
 
-// Handle adding appointment form submit
+async function editAppointment(appointmentId) {
+  try {
+    const { data: appointment, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single();
+    
+    if (error) throw error;
+
+    const form = document.getElementById('addAppointmentForm');
+    form.querySelector('#appointmentFirstName').value = appointment.first_name;
+    form.querySelector('#appointmentLastName').value = appointment.last_name || '';
+    form.querySelector('#appointmentEmail').value = appointment.email;
+    form.querySelector('#appointmentPhone').value = appointment.phone;
+    form.querySelector('#appointmentPackage').value = appointment.package_name;
+    form.querySelector('#appointmentDate').value = appointment.date;
+    form.querySelector('#appointmentTime').value = appointment.time;
+    form.querySelector('#appointmentPaymentStatus').value = appointment.payment_status;
+    form.querySelector('#appointmentTotalPrice').value = appointment.total_price || '';
+    form.querySelector('#appointmentPaymentMethod').value = appointment.payment_method || '';
+
+    form.querySelector('button[type="submit"]').textContent = 'Update Appointment';
+    form.dataset.editingId = appointmentId;
+  } catch (error) {
+    alert('Error loading appointment: ' + error.message);
+  }
+}
+
+async function deleteAppointment(appointmentId) {
+  if (!confirm('Are you sure you want to delete this appointment?')) return;
+  
+  try {
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', appointmentId);
+    
+    if (error) throw error;
+    
+    alert('Appointment deleted successfully!');
+    loadAppointments();
+  } catch (error) {
+    alert('Error deleting appointment: ' + error.message);
+  }
+}
+
+async function updateAppointmentStatus(appointmentId, newStatus) {
+  try {
+    const { error } = await supabase
+      .from('appointments')
+      .update({ 
+        payment_status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', appointmentId);
+    
+    if (error) throw error;
+    
+    // Optional: Show a success message or update UI
+  } catch (error) {
+    alert('Error updating appointment status: ' + error.message);
+    // Reload to reset to previous state
+    loadAppointments();
+  }
+}
+
+// Handle adding/updating appointment form submit
 const addAppointmentForm = document.getElementById('addAppointmentForm');
 addAppointmentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const fullName = addAppointmentForm.querySelector('input[placeholder="Full Name"]').value.trim();
-  const phone = addAppointmentForm.querySelector('input[placeholder="Phone Number"]').value.trim();
-  const email = addAppointmentForm.querySelector('input[placeholder="Email"]').value.trim();
-  const packageName = addAppointmentForm.querySelector('select').value;
-  const time = addAppointmentForm.querySelector('#appointmentTime').value;
-  const date = addAppointmentForm.querySelector('#appointmentDate').value;
+  const formData = {
+    first_name: addAppointmentForm.querySelector('#appointmentFirstName').value.trim(),
+    last_name: addAppointmentForm.querySelector('#appointmentLastName').value.trim(),
+    email: addAppointmentForm.querySelector('#appointmentEmail').value.trim(),
+    phone: addAppointmentForm.querySelector('#appointmentPhone').value.trim(),
+    package_name: addAppointmentForm.querySelector('#appointmentPackage').value,
+    date: addAppointmentForm.querySelector('#appointmentDate').value,
+    time: addAppointmentForm.querySelector('#appointmentTime').value,
+    payment_status: addAppointmentForm.querySelector('#appointmentPaymentStatus').value,
+    total_price: parseFloat(addAppointmentForm.querySelector('#appointmentTotalPrice').value) || null,
+    payment_method: addAppointmentForm.querySelector('#appointmentPaymentMethod').value.trim() || null,
+    updated_at: new Date().toISOString()
+  };
 
-  if (!fullName || !phone || !email || !packageName || !time || !date) {
-    alert('Please fill in all appointment fields.');
+  if (!formData.first_name || !formData.email || !formData.phone || 
+      !formData.package_name || !formData.date || !formData.time) {
+    alert('Please fill in all required fields.');
     return;
   }
 
   try {
-    const { error } = await supabase.from('appointments').insert({
-      full_name: fullName,
-      phone: phone,
-      email: email,
-      package: packageName,
-      time: time,
-      date: date,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-    });
+    if (addAppointmentForm.dataset.editingId) {
+      // Update existing appointment
+      const { error } = await supabase
+        .from('appointments')
+        .update(formData)
+        .eq('id', addAppointmentForm.dataset.editingId);
+      
+      if (error) throw error;
+      
+      alert('Appointment updated successfully!');
+    } else {
+      // Create new appointment
+      formData.created_at = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('appointments')
+        .insert(formData);
+      
+      if (error) throw error;
+      
+      alert('Appointment created successfully!');
+    }
 
-    if (error) throw error;
-
-    alert('Appointment added successfully!');
     addAppointmentForm.reset();
+    delete addAppointmentForm.dataset.editingId;
+    addAppointmentForm.querySelector('button[type="submit"]').textContent = 'Add Appointment';
     loadAppointments();
 
   } catch (error) {
-    alert('Error adding appointment: ' + error.message);
+    alert('Error saving appointment: ' + error.message);
   }
 });
 
