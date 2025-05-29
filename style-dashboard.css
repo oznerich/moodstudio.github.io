@@ -70,7 +70,7 @@ h5, p {
 .sidebar-item {
   padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
 }
 
 .sidebar-item:hover {
@@ -113,7 +113,7 @@ h5, p {
 }
 
 /* Responsive Layout */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
   .dashboard-content {
     flex-direction: column;
   }
@@ -137,90 +137,32 @@ h5, p {
   }
 }
 
-/* user management section */
-  .user-form,
-  .edit-users {
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 0.5rem;
-  }
-
-  .user-form h3,
-  .edit-users h3 {
-    margin-bottom: 1rem;
-    color: #007bff;
-  }
-
-  .dashboard-content {
-    margin-bottom: 1rem;
-  }
-
-  .form-group {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .form-group input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  .form-group.show-pass {
-    margin-bottom: 1.5rem;
-  }
-
-  .user-form button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 0.5rem;
+/* User Management Section */
+.user-form,
+.edit-users {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.5rem;
 }
 
-  .user-form button:hover {
-    background-color: #0056b3;
-  }
+.user-form h3,
+.edit-users h3 {
+  margin-bottom: 1rem;
+  color: #007bff;
+}
 
-  .user-list {
-    list-style: none;
-    padding: 0;
-  }
+.dashboard-content {
+  margin-bottom: 1rem;
+}
 
-  .user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 0.75rem;
-    background-color: #f9f9f9;
-  }
-
-  .edit-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-  .edit-btn:hover {
-    background-color: #218838;
-  }
+.form-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
 
 .form-group input,
 .form-group select,
@@ -233,7 +175,83 @@ h5, p {
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
-    color: #333;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.form-group.show-pass {
+  margin-bottom: 1.5rem;
+}
+
+.user-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.user-form button:hover {
+  background-color: #0056b3;
+}
+
+.user-form button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.user-form button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 0.75rem;
+  background-color: #f9f9f9;
+}
+
+.edit-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+  background-color: #218838;
+}
+
+.edit-btn:focus {
+  outline: 2px solid #28a745;
+  outline-offset: 2px;
 }
 
 /* Custom arrow for dropdown */
@@ -307,6 +325,7 @@ h5, p {
 .modal-content button[type="button"] {
   background-color: #6c757d;
   margin-left: 10px;
+  transition: background-color 0.3s ease;
 }
 
 .modal-content button[type="button"]:hover {
