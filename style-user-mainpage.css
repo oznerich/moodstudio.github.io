@@ -134,11 +134,6 @@ body {
   margin-bottom: 2.5rem;
 }
 
-.services {
-  padding: var(--hero-spacing) 1.25rem;
-  background: #fff;
-}
-
 .service {
   display: flex;
   justify-content: center;
@@ -218,10 +213,6 @@ footer {
 .footer-socials img {
   margin-top: 0.625rem;
   width: 100px;
-}
-
-.hidden {
-  display: none;
 }
 
 /* Responsive Scaling */
