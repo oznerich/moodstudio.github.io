@@ -13,6 +13,10 @@ body {
   line-height: 1.6;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -80,7 +84,11 @@ body {
   background: #eee;
 }
 
-.user-menu.show .dropdown {
+.user-menu .dropdown.hidden {
+  display: none;
+}
+
+.user-menu .dropdown:not(.hidden) {
   display: block;
 }
 
