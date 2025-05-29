@@ -1,218 +1,151 @@
-// Import Supabase client as ES module
+// Your existing imports and code here...
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Edit mode state
-let isEditing = false;
-let editingUserId = null;
+// ... Your existing functions ...
 
-// Make functions global so onclick handlers in HTML can find them
-window.showTab = showTab;
-window.editUser = editUser;
-window.deleteUser = deleteUser;
-window.togglePassword = togglePassword;
-window.filterBookings = filterBookings;
+// ---------------------------
+// NEW: Appointment Form Handling + Gallery
+// ---------------------------
 
-// Show/hide tabs and set active sidebar item
-function showTab(tabId, element) {
-  document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-  document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
+const addAppointmentForm = document.getElementById('addAppointmentForm');
+const allAppointmentsList = document.getElementById('all-appointments');
+const pendingAppointmentsList = document.getElementById('pending-appointments');
+const galleryContent = document.getElementById('gallery-content');
 
-  const activeTab = document.getElementById(tabId);
-  if (activeTab) activeTab.classList.add("active");
-  if (element) element.classList.add("active");
+// Listen for appointment form submission
+addAppointmentForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-  if (tabId === 'user-management') loadUsers();
-}
+  const fullName = document.getElementById('fullName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const packageType = document.getElementById('package').value;
+  const appointmentTime = document.getElementById('appointmentTime').value;
+  const appointmentDate = document.getElementById('appointmentDate').value;
+  const appointmentImageInput = document.getElementById('appointmentImage');
+  const imageFile = appointmentImageInput.files[0];
 
-// Load users from Supabase
-async function loadUsers() {
-  try {
-    const { data: users, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const userList = document.getElementById('users-list');
-    userList.innerHTML = users.map(user => `
-      <li class="user-item" data-id="${user.id}">
-        <span>${user.first_name} ${user.last_name} (${user.email})</span>
-        <div>
-          <button class="edit-btn" onclick="editUser('${user.id}')">Edit</button>
-          <button class="edit-btn" style="background-color:#dc3545" onclick="deleteUser('${user.id}')">Delete</button>
-        </div>
-      </li>
-    `).join('');
-  } catch (error) {
-    console.error('Error loading users:', error);
-    document.getElementById('users-list').innerHTML = `<li class="user-item error">Error loading users</li>`;
+  if (!fullName || !phone || !email || !packageType || !appointmentTime || !appointmentDate) {
+    alert('Please fill in all required fields.');
+    return;
   }
-}
-
-// Edit user (loads user data into the form for editing)
-async function editUser(userId) {
-  try {
-    const { data: user, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) throw error;
-
-    // Fill form with user data
-    const form = document.getElementById('addUserForm');
-    form.querySelector('input[placeholder="First Name"]').value = user.first_name || '';
-    form.querySelector('input[placeholder="Last Name"]').value = user.last_name || '';
-    form.querySelector('input[placeholder="Birthday"]').value = user.birthday || '';
-    form.querySelector('input[placeholder="Contact No."]').value = user.contact || '';
-    form.querySelector('input[type="email"]').value = user.email || '';
-
-    // Password left blank on edit for security
-    form.querySelector('#password').value = '';
-
-    // Change button text to "Update User"
-    form.querySelector('button[type="submit"]').textContent = 'Update User';
-
-    // Show cancel button
-    cancelEditBtn.style.display = 'inline-block';
-
-    // Set edit mode state
-    isEditing = true;
-    editingUserId = userId;
-  } catch (error) {
-    alert('Error loading user data: ' + error.message);
-  }
-}
-
-// Delete user by ID
-async function deleteUser(userId) {
-  if (!confirm('Are you sure you want to delete this user?')) return;
 
   try {
-    // Delete profile row
-    const { error: profileError } = await supabase.from('profiles').delete().eq('id', userId);
-    if (profileError) throw profileError;
+    let imageUrl = null;
 
-    // Note: Deleting auth user requires admin privileges; handle separately
-    alert('Profile deleted, but auth user deletion must be handled separately.');
+    if (imageFile) {
+      // Upload image to Supabase Storage
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const filePath = `appointments/${fileName}`;
 
-    loadUsers();
-  } catch (error) {
-    alert('Error deleting user: ' + error.message);
-  }
-}
+      const { error: uploadError } = await supabase.storage
+        .from('user-uploads')  // Make sure you have a storage bucket called 'user-uploads'
+        .upload(filePath, imageFile);
 
-// Toggle password visibility in form
-function togglePassword() {
-  const pwdInput = document.getElementById('password');
-  pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
-}
+      if (uploadError) throw uploadError;
 
-// Filter booking list by timeframe (placeholder)
-function filterBookings() {
-  const filter = document.getElementById('bookingFilter').value;
-  alert('Booking filter applied: ' + filter);
-}
-
-// Handle Add/Edit User form submission
-async function handleUserFormSubmit(event) {
-  event.preventDefault();
-  const form = event.target;
-
-  const userData = {
-    email: form.querySelector('input[type="email"]').value,
-    first_name: form.querySelector('input[placeholder="First Name"]').value,
-    last_name: form.querySelector('input[placeholder="Last Name"]').value,
-    birthday: form.querySelector('input[placeholder="Birthday"]').value,
-    contact: form.querySelector('input[placeholder="Contact No."]').value,
-    password: form.querySelector('#password').value,
-  };
-
-  try {
-    if (isEditing && editingUserId) {
-      // UPDATE user profile (email and password not updated here)
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          birthday: userData.birthday,
-          contact: userData.contact,
-        })
-        .eq('id', editingUserId);
-
-      if (updateError) throw updateError;
-
-      alert('User updated successfully!');
-
-      // Reset form & edit state
-      form.reset();
-      form.querySelector('button[type="submit"]').textContent = 'Add User';
-      cancelEditBtn.style.display = 'none';
-      isEditing = false;
-      editingUserId = null;
-
-      loadUsers();
-    } else {
-      // ADD new user via auth signup + profile insert
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-      });
-
-      if (authError) throw authError;
-
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: authData.user.id,
-        email: userData.email,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        birthday: userData.birthday,
-        contact: userData.contact,
-        role: 'User',
-      });
-
-      if (profileError) throw profileError;
-
-      alert('User added successfully!');
-      form.reset();
-      loadUsers();
+      // Get public URL of uploaded image
+      const { data: publicUrlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+      imageUrl = publicUrlData.publicUrl;
     }
+
+    // Insert appointment record
+    const { error: insertError } = await supabase.from('appointments').insert({
+      full_name: fullName,
+      phone: phone,
+      email: email,
+      package: packageType,
+      appointment_time: appointmentTime,
+      appointment_date: appointmentDate,
+      image_url: imageUrl,
+      status: 'pending', // default status
+    });
+
+    if (insertError) throw insertError;
+
+    alert('Appointment added successfully!');
+    addAppointmentForm.reset();
+
+    loadAppointments();   // Refresh lists
+    loadGalleryImages();  // Refresh gallery in case image uploaded
+
   } catch (error) {
-    alert('Error: ' + error.message);
+    alert('Error adding appointment: ' + error.message);
   }
-}
-
-// Cancel edit button logic
-const cancelEditBtn = document.createElement('button');
-cancelEditBtn.type = 'button';
-cancelEditBtn.textContent = 'Cancel';
-cancelEditBtn.style.display = 'none';
-cancelEditBtn.style.marginLeft = '10px';
-
-// Insert cancel button next to the submit button inside addUserForm
-const formButtonsContainer = document.querySelector('#addUserForm button[type="submit"]').parentNode;
-formButtonsContainer.appendChild(cancelEditBtn);
-
-cancelEditBtn.addEventListener('click', () => {
-  const form = document.getElementById('addUserForm');
-  form.reset();
-  form.querySelector('button[type="submit"]').textContent = 'Add User';
-  cancelEditBtn.style.display = 'none';
-  isEditing = false;
-  editingUserId = null;
 });
 
-// Hook form submit
-document.getElementById('addUserForm').addEventListener('submit', handleUserFormSubmit);
+// Load all appointments and pending appointments
+async function loadAppointments() {
+  try {
+    const { data: appointments, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .order('appointment_date', { ascending: false })
+      .order('appointment_time', { ascending: false });
 
-// Initial load users if user-management tab active
-if (document.getElementById('user-management').classList.contains('active')) {
-  loadUsers();
+    if (error) throw error;
+
+    // All appointments
+    allAppointmentsList.innerHTML = appointments.map(app => `
+      <li>
+        <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date} ${app.appointment_time} | Status: ${app.status}
+        ${app.image_url ? `<br><img src="${app.image_url}" alt="Uploaded image" style="max-width:100px; margin-top:5px;" />` : ''}
+      </li>
+    `).join('');
+
+    // Pending appointments only
+    const pending = appointments.filter(a => a.status === 'pending');
+    pendingAppointmentsList.innerHTML = pending.length
+      ? pending.map(app => `
+        <li>
+          <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date} ${app.appointment_time}
+          ${app.image_url ? `<br><img src="${app.image_url}" alt="Uploaded image" style="max-width:100px; margin-top:5px;" />` : ''}
+        </li>
+      `).join('')
+      : '<li>No pending appointments</li>';
+
+  } catch (error) {
+    allAppointmentsList.innerHTML = '<li>Error loading appointments</li>';
+    pendingAppointmentsList.innerHTML = '<li>Error loading appointments</li>';
+    console.error('Load appointments error:', error);
+  }
 }
+
+// Load images from storage bucket for gallery
+async function loadGalleryImages() {
+  try {
+    // List files from 'user-uploads/appointments' folder
+    const { data: files, error } = await supabase.storage
+      .from('user-uploads')
+      .list('appointments', { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error) throw error;
+
+    if (!files.length) {
+      galleryContent.innerHTML = '<p>No images in the gallery yet.</p>';
+      return;
+    }
+
+    // Create HTML for images
+    const imagesHtml = await Promise.all(files.map(async (file) => {
+      // Get public URL for each image
+      const { data: publicUrlData } = supabase.storage.from('user-uploads').getPublicUrl(`appointments/${file.name}`);
+      return `<img src="${publicUrlData.publicUrl}" alt="${file.name}" style="max-width:150px; margin: 5px; border-radius: 4px; object-fit: cover;" />`;
+    }));
+
+    galleryContent.innerHTML = imagesHtml.join('');
+
+  } catch (error) {
+    galleryContent.innerHTML = `<p>Error loading gallery images: ${error.message}</p>`;
+    console.error('Gallery load error:', error);
+  }
+}
+
+// On initial load, load appointments and gallery if those tabs are active or in general
+loadAppointments();
+loadGalleryImages();
