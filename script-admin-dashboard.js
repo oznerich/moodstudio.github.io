@@ -5,23 +5,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ------------------
-// TAB SWITCHING FUNCTION
-// ------------------
-function showTab(tabId, element) {
-  // Hide all tabs
+// --------- TAB SWITCHING ---------
+document.getElementById('sidebar-list').addEventListener('click', (e) => {
+  const clickedItem = e.target.closest('.sidebar-item');
+  if (!clickedItem) return;
+
+  // Remove active classes
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  // Show selected tab
-  document.getElementById(tabId).classList.add('active');
-
-  // Remove active class on all sidebar items
   document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-  // Add active class to clicked sidebar item
-  element.classList.add('active');
-}
 
-// Expose to global so inline onclick works
-window.showTab = showTab;
+  // Activate clicked sidebar item and corresponding tab
+  clickedItem.classList.add('active');
+  const tabId = clickedItem.getAttribute('data-tab');
+  const tab = document.getElementById(tabId);
+  if (tab) tab.classList.add('active');
+});
+
+// --------- PASSWORD TOGGLE ---------
+document.querySelector('.show-pass input[type="checkbox"]').addEventListener('change', (e) => {
+  const passwordInput = document.getElementById('password');
+  passwordInput.type = e.target.checked ? 'text' : 'password';
+});
 
 // ---------------------------
 // APPOINTMENTS AND GALLERY HANDLING
