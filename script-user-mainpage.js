@@ -12,7 +12,6 @@ window.onload = async () => {
   const joinNow = document.getElementById('joinNow');
   const userMenu = document.getElementById('userMenu');
   const userNameBtn = document.getElementById('userName');
-  const dropdown = userMenu.querySelector('.dropdown');
 
   if (!user) {
     console.log("No user logged in.");
@@ -21,11 +20,11 @@ window.onload = async () => {
     return;
   }
 
-  // Hide Join Now, show dropdown
+  // Hide Join Now, show user menu
   joinNow.classList.add('hidden');
   userMenu.classList.remove('hidden');
 
-  // Get full name from profiles table
+  // Get user's full name from the profiles table
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('first_name, last_name')
@@ -40,9 +39,9 @@ window.onload = async () => {
     userNameBtn.textContent = `${fullName} ▾`;
   }
 
-  // Toggle dropdown on click
+  // Toggle dropdown visibility
   userNameBtn.onclick = () => {
-    dropdown.classList.toggle('hidden');
+    userMenu.classList.toggle('show');
   };
 };
 
