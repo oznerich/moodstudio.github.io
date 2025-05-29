@@ -1,11 +1,10 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const supabaseUrl = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
-;
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Sidebar tab switching
+// TAB SWITCHING
 document.querySelectorAll('.sidebar-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -17,19 +16,40 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
   });
 });
 
-// DASHBOARD INSIGHTS (placeholder AI-powered text)
+// ====== DASHBOARD INSIGHTS with free AI API example (using Hugging Face Inference API public sentiment model) ======
+// NOTE: This is a placeholder to demonstrate AI API integration for free, you can change to any free AI API as needed.
+// This example just fetches a fake "insight" from a sentiment API as a demo.
 async function loadAnalytics() {
-  // For demo, just a static insight:
   const aiInsightsEl = document.getElementById('ai-insights');
   aiInsightsEl.textContent = 'Loading insights...';
 
-  // Imagine here you fetch from an AI API or generate analytics
-  setTimeout(() => {
-    aiInsightsEl.textContent = 'You have 10 upcoming appointments and 5 new users this week.';
-  }, 1000);
+  try {
+    // Example: Call a public Hugging Face API for demo, no API key needed here, just to simulate AI call
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: 'The admin dashboard is running smoothly!' }),
+      }
+    );
+    const result = await response.json();
+
+    // Construct a simple insight based on the sentiment result
+    if (Array.isArray(result) && result.length > 0) {
+      const label = result[0].label || 'Neutral';
+      const score = (result[0].score * 100).toFixed(2);
+      aiInsightsEl.textContent = `AI Insight: Sentiment is "${label}" with confidence ${score}%.`;
+    } else {
+      aiInsightsEl.textContent = 'AI Insight: Unable to fetch sentiment data.';
+    }
+  } catch (e) {
+    aiInsightsEl.textContent = 'Failed to load AI insights.';
+    console.error(e);
+  }
 }
 
-// APPOINTMENTS
+// ====== APPOINTMENTS ======
 const addAppointmentForm = document.getElementById('addAppointmentForm');
 const allAppointmentsList = document.getElementById('all-appointments');
 
@@ -50,8 +70,8 @@ addAppointmentForm.addEventListener('submit', async (e) => {
 
   const { error } = await supabase.from('appointments').insert([{
     full_name: fullName,
-    phone: phone,
-    email: email,
+    phone,
+    email,
     package: packageSelected,
     appointment_time: appointmentTime,
     appointment_date: appointmentDate,
@@ -63,8 +83,8 @@ addAppointmentForm.addEventListener('submit', async (e) => {
   }
 
   addAppointmentForm.reset();
-  loadAppointments();
-  loadAnalytics();
+  await loadAppointments();
+  await loadAnalytics();
 });
 
 async function loadAppointments() {
@@ -86,7 +106,6 @@ async function loadAppointments() {
     const li = document.createElement('li');
     li.textContent = `${app.full_name} | ${app.package} | ${app.appointment_date} @ ${app.appointment_time}`;
 
-    // Edit button (placeholder)
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
     editBtn.style.backgroundColor = '#007bff';
@@ -96,7 +115,6 @@ async function loadAppointments() {
     editBtn.style.borderRadius = '4px';
     editBtn.onclick = () => alert('Edit functionality coming soon.');
 
-    // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Delete';
     deleteBtn.style.marginLeft = '5px';
@@ -107,8 +125,8 @@ async function loadAppointments() {
           alert('Failed to delete: ' + error.message);
           return;
         }
-        loadAppointments();
-        loadAnalytics();
+        await loadAppointments();
+        await loadAnalytics();
       }
     };
 
@@ -118,7 +136,7 @@ async function loadAppointments() {
   });
 }
 
-// BOOKING HISTORY
+// ====== BOOKING HISTORY ======
 const bookingsList = document.getElementById('bookings-list');
 
 async function loadBookingHistory() {
@@ -143,7 +161,7 @@ async function loadBookingHistory() {
   });
 }
 
-// USER MANAGEMENT
+// ====== USER MANAGEMENT ======
 const addUserForm = document.getElementById('addUserForm');
 const usersList = document.getElementById('users-list');
 
@@ -172,7 +190,7 @@ addUserForm.addEventListener('submit', async (e) => {
   }
 
   addUserForm.reset();
-  loadUsers();
+  await loadUsers();
 });
 
 async function loadUsers() {
@@ -194,10 +212,18 @@ async function loadUsers() {
     const li = document.createElement('li');
     li.textContent = `${user.first_name} ${user.last_name} (${user.email})`;
 
-    // Delete button
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.style.backgroundColor = '#007bff';
+    editBtn.style.color = 'white';
+    editBtn.style.border = 'none';
+    editBtn.style.marginLeft = '10px';
+    editBtn.style.borderRadius = '4px';
+    editBtn.onclick = () => alert('Edit user feature coming soon.');
+
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Delete';
-    deleteBtn.style.marginLeft = '10px';
+    deleteBtn.style.marginLeft = '5px';
     deleteBtn.onclick = async () => {
       if (confirm(`Delete user ${user.first_name} ${user.last_name}?`)) {
         const { error } = await supabase.from('profiles').delete().eq('id', user.id);
@@ -205,20 +231,22 @@ async function loadUsers() {
           alert('Failed to delete user: ' + error.message);
           return;
         }
-        loadUsers();
+        await loadUsers();
       }
     };
 
+    li.appendChild(editBtn);
     li.appendChild(deleteBtn);
+
     usersList.appendChild(li);
   });
 }
 
-// GALLERY
+// ====== GALLERY ======
 const galleryContent = document.getElementById('gallery-content');
 
 async function loadGallery() {
-  const { data, error } = await supabase.storage.from('gallery').list();
+  const { data, error } = await supabase.from('gallery').select('id, image_url');
 
   galleryContent.innerHTML = '';
 
@@ -228,28 +256,23 @@ async function loadGallery() {
   }
 
   if (!data || data.length === 0) {
-    galleryContent.textContent = 'No images found in gallery.';
+    galleryContent.textContent = 'No images in gallery.';
     return;
   }
 
-  for (const item of data) {
-    if (item.type === 'file') {
-      const { publicURL, error: urlError } = supabase.storage.from('gallery').getPublicUrl(item.name);
-      if (!urlError) {
-        const img = document.createElement('img');
-        img.src = publicURL;
-        img.alt = item.name;
-        img.style.maxWidth = '150px';
-        img.style.borderRadius = '8px';
-        img.style.margin = '5px';
-        galleryContent.appendChild(img);
-      }
-    }
-  }
+  data.forEach(img => {
+    const imageEl = document.createElement('img');
+    imageEl.src = img.image_url;
+    imageEl.alt = `Gallery image ${img.id}`;
+    imageEl.style.maxWidth = '150px';
+    imageEl.style.margin = '5px';
+    imageEl.style.borderRadius = '8px';
+    galleryContent.appendChild(imageEl);
+  });
 }
 
-// Initialize dashboard data
-async function init() {
+// INITIAL LOAD
+async function initializeDashboard() {
   await loadAnalytics();
   await loadAppointments();
   await loadBookingHistory();
@@ -257,4 +280,4 @@ async function init() {
   await loadGallery();
 }
 
-window.addEventListener('DOMContentLoaded', init);
+initializeDashboard();
