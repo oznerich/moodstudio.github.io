@@ -7,27 +7,123 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script type="module" src="script-booking.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 20px;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .packages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .packages button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    #image-preview {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      background: #ddd;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button[type="submit"] {
+      background: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    #time-buttons button {
+      margin: 5px 5px 0 0;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #gcash-qr {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <h1>Book Your Photography Session</h1>
 
-  <section>
+  <section class="container">
     <h2>Select Package</h2>
     <div class="packages">
       <button onclick="selectPackage('images/basic.jpg', 'Basic Package', 500)">Basic Package - ₱500</button>
       <button onclick="selectPackage('images/premium.jpg', 'Premium Package', 1000)">Premium Package - ₱1000</button>
       <button onclick="selectPackage('images/deluxe.jpg', 'Deluxe Package', 1500)">Deluxe Package - ₱1500</button>
     </div>
-    <div id="image-preview" style="margin-top: 10px; height: 200px;"></div>
+    <div id="image-preview">Preview will show here</div>
   </section>
 
-  <section class="date-time" style="display:none;">
+  <section class="container date-time" style="display:none;">
     <h2>Choose Date and Time</h2>
     <input type="date" id="date-picker" onchange="showTimes()" />
     <div id="time-buttons" style="margin-top: 10px;"></div>
   </section>
 
-  <section class="booking-form" style="display:none;">
+  <section class="container booking-form" style="display:none;">
     <h2>Your Details</h2>
     <form id="bookingForm" onsubmit="event.preventDefault(); startPayment();">
       <div class="form-group">
