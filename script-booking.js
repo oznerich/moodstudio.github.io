@@ -1,25 +1,26 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // use full key in your actual code
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Dropdown toggle
+// Toggle dropdown
 window.toggleDropdown = function(header) {
   const content = header.nextElementSibling;
   content.classList.toggle('hidden');
 };
 
+// Booking state
 let selectedPackage = { name: '', imageUrl: '' };
 let selectedTime = '';
 
-// Package selection
+// Select package
 window.selectPackage = function(imageUrl, name) {
   document.getElementById('image-preview').innerHTML = `<img src="${imageUrl}" style="max-height: 100%; max-width: 100%; object-fit: cover;">`;
   selectedPackage = { name, imageUrl };
 };
 
-// Scroll to next section
+// Scroll to date/time
 window.nextSection = function(sectionId) {
   document.querySelector('.date-time').style.display = 'block';
   document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
@@ -35,7 +36,7 @@ window.onload = () => {
   datePicker.min = `${yyyy}-${mm}-${dd}`;
 };
 
-// Show time options
+// Show time buttons
 window.showTimes = function() {
   const selectedDate = new Date(document.getElementById('date-picker').value);
   const day = selectedDate.getDay();
@@ -59,13 +60,13 @@ window.showTimes = function() {
   }
 };
 
-// Toggle GCash QR visibility
+// Show/hide GCash QR
 window.toggleGcashQR = function(value) {
   const qr = document.getElementById('gcash-qr');
   qr.style.display = (value === 'GCash') ? 'block' : 'none';
 };
 
-// Simulate payment
+// Start payment (immediate submission)
 window.startPayment = function() {
   const paymentMethod = document.getElementById('payment-method').value;
   if (!paymentMethod) {
@@ -73,15 +74,10 @@ window.startPayment = function() {
     return;
   }
 
-  alert("Processing payment via " + paymentMethod + "...");
-
-  setTimeout(() => {
-    alert("✅ Payment successful!");
-    submitBooking(paymentMethod);
-  }, 2000);
+  submitBooking(paymentMethod); // skip fake delay
 };
 
-// Submit booking to Supabase
+// Submit to Supabase
 window.submitBooking = async function(paymentMethod) {
   const firstName = document.getElementById('first-name').value.trim();
   const lastName = document.getElementById('last-name').value.trim();
@@ -111,9 +107,7 @@ window.submitBooking = async function(paymentMethod) {
   if (error) {
     alert("Error booking: " + error.message);
   } else {
-    alert("Booking successful! Redirecting to the main page...");
-    setTimeout(() => {
-      window.location.href = "user-mainpage.html";
-    }, 1500);
+    alert("✅ Booking successful!");
+    window.location.href = "user-mainpage.html";
   }
 };
