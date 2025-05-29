@@ -2,18 +2,25 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://rdgahcjjbewvyqcfdtih.supabase.co',
-   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
 );
 
-// Tab switching
-window.showTab = (id, el) => {
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-};
+// TAB SWITCHING
+const sidebarItems = document.querySelectorAll('.sidebar-item');
+sidebarItems.forEach(item => {
+  item.addEventListener('click', () => {
+    sidebarItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
 
-// AI Analytics
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+
+    const tabId = item.getAttribute('data-tab');
+    const tab = document.getElementById(tabId);
+    if (tab) tab.classList.add('active');
+  });
+});
+
+// AI-Powered Analytics
 async function loadAnalytics() {
   const { data, error } = await supabase.from('appointments').select('*');
   if (error || !data) {
@@ -21,28 +28,36 @@ async function loadAnalytics() {
     return;
   }
 
-  const insights = [];
   const packages = data.reduce((acc, app) => {
     acc[app.package] = (acc[app.package] || 0) + 1;
     return acc;
   }, {});
 
-  if ((packages.euphoria || 0) > (packages.serendipity || 0) && (packages.euphoria || 0) > (packages.keepsake || 0)) {
-    insights.push('Euphoria is the most popular package.');
+  let insight = '';
+  const e = packages.euphoria || 0, s = packages.serendipity || 0, k = packages.keepsake || 0;
+  if (e > s && e > k) {
+    insight = 'Euphoria is the most popular package.';
+  } else if (s > e && s > k) {
+    insight = 'Serendipity is the most popular package.';
+  } else if (k > e && k > s) {
+    insight = 'Keepsake is the most popular package.';
+  } else {
+    insight = 'Packages are equally popular or no data.';
   }
 
-  const recent = data.filter(app => new Date(app.appointment_date) > new Date(Date.now() - 7 * 86400000));
-  insights.push(`You have ${recent.length} bookings this week.`);
+  const recent = data.filter(app => new Date(app.appointment_date) > (Date.now() - 7 * 86400000));
+  insight += ` You have ${recent.length} bookings this week.`;
 
-  document.getElementById('ai-insights').textContent = insights.join(' ');
+  document.getElementById('ai-insights').textContent = insight;
 }
 
-// Appointments
-const form = document.getElementById('addAppointmentForm');
-const list = document.getElementById('all-appointments');
+// APPOINTMENTS
+const addAppointmentForm = document.getElementById('addAppointmentForm');
+const allAppointmentsList = document.getElementById('all-appointments');
 
-form.addEventListener('submit', async e => {
+addAppointmentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const newApp = {
     full_name: document.getElementById('fullName').value,
     phone: document.getElementById('phone').value,
@@ -52,88 +67,113 @@ form.addEventListener('submit', async e => {
     appointment_date: document.getElementById('appointmentDate').value,
     status: 'pending'
   };
+
   const { error } = await supabase.from('appointments').insert(newApp);
-  if (!error) {
-    form.reset();
-    loadAppointments();
-    loadAnalytics();
+  if (error) {
+    alert('Failed to add appointment: ' + error.message);
+    return;
   }
+  addAppointmentForm.reset();
+  loadAppointments();
+  loadAnalytics();
 });
 
 async function loadAppointments() {
-  const { data } = await supabase.from('appointments').select('*');
-  list.innerHTML = data.map(app => `
+  const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: true });
+  if (error || !data) {
+    allAppointmentsList.innerHTML = '<li>Failed to load appointments.</li>';
+    return;
+  }
+
+  allAppointmentsList.innerHTML = data.map(app => `
     <li>
-      <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date}
-      <button onclick="deleteAppointment(${app.id})">Delete</button>
+      <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date} | ${app.appointment_time}
+      <button data-id="${app.id}" class="delete-appointment">Delete</button>
     </li>
   `).join('');
+
+  document.querySelectorAll('.delete-appointment').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute('data-id');
+      await supabase.from('appointments').delete().eq('id', id);
+      loadAppointments();
+      loadAnalytics();
+    };
+  });
 }
 
-window.deleteAppointment = async (id) => {
-  await supabase.from('appointments').delete().eq('id', id);
-  loadAppointments();
-  loadAnalytics();
-};
+// USERS
+const addUserForm = document.getElementById('addUserForm');
+const usersList = document.getElementById('users-list');
 
-// Users
-const userForm = document.getElementById('addUserForm');
-const userList = document.getElementById('users-list');
-
-userForm.addEventListener('submit', async e => {
+addUserForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const user = {
     email: document.getElementById('userEmail').value,
     first_name: document.getElementById('firstName').value,
-    last_name: document.getElementById('lastName').value
+    last_name: document.getElementById('lastName').value,
   };
+
   const { error } = await supabase.from('profiles').insert(user);
-  if (!error) {
-    userForm.reset();
-    loadUsers();
+  if (error) {
+    alert('Failed to add user: ' + error.message);
+    return;
   }
+  addUserForm.reset();
+  loadUsers();
 });
 
 async function loadUsers() {
-  const { data } = await supabase.from('profiles').select('*');
-  userList.innerHTML = data.map(user => `
+  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error || !data) {
+    usersList.innerHTML = '<li>Failed to load users.</li>';
+    return;
+  }
+
+  usersList.innerHTML = data.map(user => `
     <li>
       ${user.first_name} ${user.last_name} - ${user.email}
-      <button onclick="deleteUser('${user.id}')">Delete</button>
+      <button data-id="${user.id}" class="delete-user">Delete</button>
     </li>
   `).join('');
+
+  document.querySelectorAll('.delete-user').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute('data-id');
+      await supabase.from('profiles').delete().eq('id', id);
+      loadUsers();
+    };
+  });
 }
 
-window.deleteUser = async (id) => {
-  await supabase.from('profiles').delete().eq('id', id);
-  loadUsers();
-};
-
-// Booking History
+// BOOKING HISTORY (for demo, showing all appointments again)
+const bookingsList = document.getElementById('bookings-list');
 async function loadBookingHistory() {
-  const { data } = await supabase.from('appointments').select('*');
-  document.getElementById('bookings-list').innerHTML = data.map(app => `
-    <li>${app.full_name} | ${app.package} | ${app.appointment_date}</li>
+  const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: false });
+  if (error || !data) {
+    bookingsList.innerHTML = '<li>Failed to load booking history.</li>';
+    return;
+  }
+  bookingsList.innerHTML = data.map(b => `
+    <li>${b.full_name} - ${b.package} - ${b.appointment_date} - ${b.appointment_time}</li>
   `).join('');
 }
 
-// Gallery
-async function loadGallery() {
-  const { data, error } = await supabase.storage.from('user-uploads').list('appointments');
-  if (error) return;
-
-  const container = document.getElementById('gallery-content');
-  const images = await Promise.all(data.map(async file => {
-    const { data: pub } = supabase.storage.from('user-uploads').getPublicUrl(`appointments/${file.name}`);
-    return `<img src="${pub.publicUrl}" width="100" height="100" />`;
-  }));
-
-  container.innerHTML = images.join('');
+// GALLERY (sample static for demo)
+const galleryContent = document.getElementById('gallery-content');
+function loadGallery() {
+  const images = [
+    'https://picsum.photos/id/1015/200/150',
+    'https://picsum.photos/id/1020/200/150',
+    'https://picsum.photos/id/1025/200/150',
+  ];
+  galleryContent.innerHTML = images.map(src => `<img src="${src}" alt="Gallery Image" width="200" height="150"/>`).join('');
 }
 
-// Initial load
+// INITIAL LOAD
+loadAnalytics();
 loadAppointments();
 loadUsers();
 loadBookingHistory();
 loadGallery();
-loadAnalytics();
