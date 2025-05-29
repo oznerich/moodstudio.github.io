@@ -20,6 +20,7 @@ h2 {
 .dashboard-container {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 /* Sidebar */
@@ -29,17 +30,24 @@ h2 {
   padding: 1rem;
   color: white;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar ul {
   list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  flex-grow: 1;
 }
 
 .sidebar-item {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s ease;
+  border-radius: 5px;
+  user-select: none;
 }
 
 .sidebar-item:hover {
@@ -49,7 +57,6 @@ h2 {
 .sidebar-item.active {
   background-color: #1c92b9;
   color: whitesmoke;
-  border-radius: 5px;
 }
 
 /* Main content */
@@ -57,8 +64,12 @@ h2 {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  background: white;
+  box-shadow: inset 0 0 10px rgb(0 0 0 / 0.05);
+  border-radius: 8px;
 }
 
+/* Tabs */
 .tab {
   display: none;
 }
@@ -69,7 +80,7 @@ h2 {
 
 /* Forms */
 form > div {
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -80,12 +91,14 @@ input[type="email"],
 input[type="tel"],
 select,
 input[type="time"],
-input[type="date"] {
+input[type="date"],
+input[type="password"] {
   flex: 1 1 200px;
-  padding: 0.6rem;
+  padding: 0.6rem 0.75rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
+  transition: border-color 0.3s ease, outline 0.3s ease;
 }
 
 input[type="text"]:focus,
@@ -93,31 +106,40 @@ input[type="email"]:focus,
 input[type="tel"]:focus,
 select:focus,
 input[type="time"]:focus,
-input[type="date"]:focus {
+input[type="date"]:focus,
+input[type="password"]:focus {
   border-color: #007bff;
   outline: 2px solid #007bff;
   outline-offset: 2px;
 }
 
+/* Buttons */
 button {
   cursor: pointer;
   background-color: #007bff;
   border: none;
   color: white;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 5px;
   font-weight: bold;
   transition: background-color 0.3s ease;
+  user-select: none;
 }
 
 button:hover {
   background-color: #0056b3;
 }
 
-/* List styles */
+button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Lists */
 ul {
   list-style: none;
   padding-left: 0;
+  margin: 0;
 }
 
 li {
@@ -128,15 +150,24 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  word-break: break-word;
 }
 
 li button {
   margin-left: 10px;
   background-color: #dc3545;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
 }
 
 li button:hover {
   background-color: #b02a37;
+}
+
+/* User list specifics */
+.user-item > div {
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* Gallery images */
@@ -148,16 +179,26 @@ li button:hover {
   object-fit: cover;
 }
 
+/* Dashboard analytics spacing */
+.dashboard-spacing {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-container {
     flex-direction: column;
+    height: auto;
   }
 
   .sidebar {
     width: 100%;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     padding: 0.5rem 0;
   }
 
@@ -165,12 +206,12 @@ li button:hover {
     display: flex;
     gap: 1rem;
     padding: 0;
-    width: 100%;
-    justify-content: center;
+    margin: 0;
   }
 
   .sidebar-item {
     margin: 0;
+    padding: 0.5rem 0.75rem;
   }
 
   form > div {
@@ -182,7 +223,13 @@ li button:hover {
   input[type="tel"],
   select,
   input[type="time"],
-  input[type="date"] {
+  input[type="date"],
+  input[type="password"] {
     flex: 1 1 100%;
+  }
+
+  .dashboard-spacing {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
