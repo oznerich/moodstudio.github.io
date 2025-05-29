@@ -8,47 +8,62 @@
 body {
   background-color: #f8f9fa;
   color: #333;
-}
-
-.container {
-  max-width: 1000px;
-  margin: auto;
   padding: 20px;
 }
 
 h1, h2 {
   margin-bottom: 20px;
   text-align: center;
+  color: #333;
 }
 
-/* Package Section */
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
+
+/* Section Style */
+section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Package Buttons */
 .packages {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
   justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .packages button {
-  padding: 10px 15px;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
+  padding: 10px 20px;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.packages button:hover {
+  background: #0056b3;
 }
 
 /* Image Preview */
 #image-preview {
   width: 100%;
   height: 200px;
-  background: #ddd;
+  background: #e0e0e0;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 #image-preview img {
@@ -57,14 +72,39 @@ h1, h2 {
   object-fit: cover;
 }
 
-/* Form Sections */
-section {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 20px;
+/* Date and Time */
+input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
 }
 
+#time-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+#time-buttons button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+#time-buttons button:hover {
+  background: #0056b3;
+}
+
+/* Form Styling */
 .form-group {
   margin-bottom: 15px;
 }
@@ -73,77 +113,78 @@ section {
   display: block;
   margin-bottom: 6px;
   font-weight: bold;
+  color: #333;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-/* Time Selection Buttons */
-#time-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+/* Promo Code */
+#promo-code {
+  font-style: italic;
 }
 
-#time-buttons button {
-  padding: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Submit Button */
-button[type="submit"],
-button.submit-btn {
-  background: #28a745;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 1.1rem;
-}
-
-button[type="submit"]:hover,
-button.submit-btn:hover {
-  background-color: #218838;
-}
-
-/* Total Price Display */
+/* Total Price */
 #total-price {
-  font-size: 1.3rem;
+  display: block;
+  font-size: 1.4rem;
+  font-weight: bold;
   color: #28a745;
   text-align: center;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-/* GCash QR Code */
+/* GCash QR Section */
 #gcash-qr {
   text-align: center;
-  margin-top: 15px;
+  padding: 15px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 #gcash-qr img {
   max-width: 160px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  margin-bottom: 10px;
 }
 
-/* Hidden states */
+#gcash-qr p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* Submit Button */
+button[type="submit"] {
+  background: #28a745;
+  color: white;
+  padding: 12px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+  background: #218838;
+}
+
+/* Hidden Class */
 .hidden {
   display: none;
 }
 
-/* Responsive tweaks */
+/* Responsive */
 @media (max-width: 600px) {
   .packages {
     flex-direction: column;
@@ -152,5 +193,17 @@ button.submit-btn:hover {
 
   #time-buttons {
     justify-content: center;
+  }
+
+  section {
+    padding: 15px;
+  }
+
+  input, select {
+    font-size: 1rem;
+  }
+
+  button[type="submit"] {
+    font-size: 1rem;
   }
 }
