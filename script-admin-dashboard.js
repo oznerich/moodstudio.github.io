@@ -503,5 +503,6 @@ showTab('dashboard', document.querySelector('.sidebar-item.active'));
 // Add event listeners to timeframe selects on dashboard to refresh counts if changed
 document.getElementById('analytics-timeframe').addEventListener('change', loadDashboardAnalytics);
 document.getElementById('package-timeframe').addEventListener('change', loadDashboardAnalytics);
+document.getElementById('cancelEditBtn').addEventListener('click', cancelAppointmentEdit);
 
 loadGallery();
