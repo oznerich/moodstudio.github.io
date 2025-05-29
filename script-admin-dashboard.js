@@ -45,7 +45,8 @@ async function loadAnalytics() {
     insight = 'Packages are equally popular or no data.';
   }
 
-  const recent = data.filter(app => new Date(app.appointment_date) > (Date.now() - 7 * 86400000));
+  const oneWeekAgo = new Date(Date.now() - 7 * 86400000);
+  const recent = data.filter(app => new Date(app.appointment_date) >= oneWeekAgo);
   insight += ` You have ${recent.length} bookings this week.`;
 
   document.getElementById('ai-insights').textContent = insight;
@@ -58,122 +59,213 @@ const allAppointmentsList = document.getElementById('all-appointments');
 addAppointmentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const newApp = {
-    full_name: document.getElementById('fullName').value,
-    phone: document.getElementById('phone').value,
-    email: document.getElementById('email').value,
-    package: document.getElementById('package').value,
-    appointment_time: document.getElementById('appointmentTime').value,
-    appointment_date: document.getElementById('appointmentDate').value,
-    status: 'pending'
-  };
+  const fullName = document.getElementById('fullName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const packageSelected = document.getElementById('package').value;
+  const appointmentTime = document.getElementById('appointmentTime').value;
+  const appointmentDate = document.getElementById('appointmentDate').value;
 
-  const { error } = await supabase.from('appointments').insert(newApp);
-  if (error) {
-    alert('Failed to add appointment: ' + error.message);
+  if (!fullName || !phone || !email || !packageSelected || !appointmentTime || !appointmentDate) {
+    alert('Please fill all fields.');
     return;
   }
+
+  const { error } = await supabase.from('appointments').insert([{
+    full_name: fullName,
+    phone,
+    email,
+    package: packageSelected,
+    appointment_time: appointmentTime,
+    appointment_date: appointmentDate,
+  }]);
+
+  if (error) {
+    alert('Error adding appointment: ' + error.message);
+    return;
+  }
+
   addAppointmentForm.reset();
   loadAppointments();
   loadAnalytics();
 });
 
 async function loadAppointments() {
-  const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: true });
+  const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: false });
+
   if (error || !data) {
-    allAppointmentsList.innerHTML = '<li>Failed to load appointments.</li>';
+    allAppointmentsList.innerHTML = '<li>Error loading appointments.</li>';
     return;
   }
 
-  allAppointmentsList.innerHTML = data.map(app => `
-    <li>
-      <strong>${app.full_name}</strong> | ${app.package} | ${app.appointment_date} | ${app.appointment_time}
-      <button data-id="${app.id}" class="delete-appointment">Delete</button>
-    </li>
-  `).join('');
+  allAppointmentsList.innerHTML = '';
 
-  document.querySelectorAll('.delete-appointment').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.getAttribute('data-id');
-      await supabase.from('appointments').delete().eq('id', id);
-      loadAppointments();
-      loadAnalytics();
+  if (data.length === 0) {
+    allAppointmentsList.innerHTML = '<li>No appointments found.</li>';
+    return;
+  }
+
+  data.forEach(app => {
+    const li = document.createElement('li');
+    li.textContent = `${app.full_name} | ${app.package} | ${app.appointment_date} @ ${app.appointment_time}`;
+
+    // Edit button (placeholder alert)
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.style.backgroundColor = '#0d6efd';
+    editBtn.onclick = () => alert('Edit functionality to be implemented.');
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = async () => {
+      if (confirm(`Delete appointment for ${app.full_name}?`)) {
+        const { error } = await supabase.from('appointments').delete().eq('id', app.id);
+        if (error) {
+          alert('Failed to delete: ' + error.message);
+          return;
+        }
+        loadAppointments();
+        loadAnalytics();
+      }
     };
+
+    li.appendChild(editBtn);
+    li.appendChild(deleteBtn);
+    allAppointmentsList.appendChild(li);
   });
 }
 
-// USERS
+// BOOKING HISTORY
+const bookingsList = document.getElementById('bookings-list');
+async function loadBookingHistory() {
+  const { data, error } = await supabase.from('booking_history').select('*').order('booking_date', { ascending: false });
+
+  if (error || !data) {
+    bookingsList.innerHTML = '<li>Error loading booking history.</li>';
+    return;
+  }
+
+  bookingsList.innerHTML = '';
+
+  if (data.length === 0) {
+    bookingsList.innerHTML = '<li>No booking history found.</li>';
+    return;
+  }
+
+  data.forEach(booking => {
+    const li = document.createElement('li');
+    li.textContent = `${booking.user_name} booked ${booking.package_name} on ${booking.booking_date}`;
+    bookingsList.appendChild(li);
+  });
+}
+
+// USER MANAGEMENT
 const addUserForm = document.getElementById('addUserForm');
 const usersList = document.getElementById('users-list');
 
 addUserForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const user = {
-    email: document.getElementById('userEmail').value,
-    first_name: document.getElementById('firstName').value,
-    last_name: document.getElementById('lastName').value,
-  };
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const userEmail = document.getElementById('userEmail').value.trim();
 
-  const { error } = await supabase.from('profiles').insert(user);
-  if (error) {
-    alert('Failed to add user: ' + error.message);
+  if (!firstName || !lastName || !userEmail) {
+    alert('Please fill all user fields.');
     return;
   }
+
+  const { error } = await supabase.from('profiles').insert([{
+    first_name: firstName,
+    last_name: lastName,
+    email: userEmail,
+    role: 'User',
+  }]);
+
+  if (error) {
+    alert('Error adding user: ' + error.message);
+    return;
+  }
+
   addUserForm.reset();
   loadUsers();
 });
 
 async function loadUsers() {
   const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+
   if (error || !data) {
-    usersList.innerHTML = '<li>Failed to load users.</li>';
+    usersList.innerHTML = '<li>Error loading users.</li>';
     return;
   }
 
-  usersList.innerHTML = data.map(user => `
-    <li>
-      ${user.first_name} ${user.last_name} - ${user.email}
-      <button data-id="${user.id}" class="delete-user">Delete</button>
-    </li>
-  `).join('');
+  usersList.innerHTML = '';
 
-  document.querySelectorAll('.delete-user').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.getAttribute('data-id');
-      await supabase.from('profiles').delete().eq('id', id);
-      loadUsers();
+  if (data.length === 0) {
+    usersList.innerHTML = '<li>No users found.</li>';
+    return;
+  }
+
+  data.forEach(user => {
+    const li = document.createElement('li');
+    li.textContent = `${user.first_name} ${user.last_name} (${user.email})`;
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = async () => {
+      if (confirm(`Delete user ${user.first_name} ${user.last_name}?`)) {
+        const { error } = await supabase.from('profiles').delete().eq('id', user.id);
+        if (error) {
+          alert('Failed to delete user: ' + error.message);
+          return;
+        }
+        loadUsers();
+      }
     };
+
+    li.appendChild(deleteBtn);
+    usersList.appendChild(li);
   });
 }
 
-// BOOKING HISTORY (for demo, showing all appointments again)
-const bookingsList = document.getElementById('bookings-list');
-async function loadBookingHistory() {
-  const { data, error } = await supabase.from('appointments').select('*').order('appointment_date', { ascending: false });
+// GALLERY
+const galleryContent = document.getElementById('gallery-content');
+async function loadGallery() {
+  const { data, error } = await supabase.storage.from('gallery').list();
+
   if (error || !data) {
-    bookingsList.innerHTML = '<li>Failed to load booking history.</li>';
+    galleryContent.innerHTML = 'Failed to load gallery images.';
     return;
   }
-  bookingsList.innerHTML = data.map(b => `
-    <li>${b.full_name} - ${b.package} - ${b.appointment_date} - ${b.appointment_time}</li>
-  `).join('');
+
+  if (data.length === 0) {
+    galleryContent.innerHTML = 'No images found in gallery.';
+    return;
+  }
+
+  galleryContent.innerHTML = '';
+  for (const item of data) {
+    if (item.type === 'file') {
+      const { publicURL, error: urlError } = supabase.storage.from('gallery').getPublicUrl(item.name);
+      if (!urlError) {
+        const img = document.createElement('img');
+        img.src = publicURL;
+        img.alt = item.name;
+        galleryContent.appendChild(img);
+      }
+    }
+  }
 }
 
-// GALLERY (sample static for demo)
-const galleryContent = document.getElementById('gallery-content');
-function loadGallery() {
-  const images = [
-    'https://picsum.photos/id/1015/200/150',
-    'https://picsum.photos/id/1020/200/150',
-    'https://picsum.photos/id/1025/200/150',
-  ];
-  galleryContent.innerHTML = images.map(src => `<img src="${src}" alt="Gallery Image" width="200" height="150"/>`).join('');
+// Initialize dashboard
+async function init() {
+  await loadAnalytics();
+  await loadAppointments();
+  await loadBookingHistory();
+  await loadUsers();
+  await loadGallery();
 }
 
-// INITIAL LOAD
-loadAnalytics();
-loadAppointments();
-loadUsers();
-loadBookingHistory();
-loadGallery();
+window.addEventListener('DOMContentLoaded', init);
