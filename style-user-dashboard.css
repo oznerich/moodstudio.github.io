@@ -1,0 +1,125 @@
+    :root {
+      --main-color: #2c2c2c;
+      --accent-color: #444;
+      --highlight-color: #ff4d4d;
+      --bg-color: #f0f0f0;
+      --font-color: #222;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--font-color);
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--main-color);
+      color: var(--bg-color);;
+      padding: 1rem;
+      padding-left: 3rem;
+      text-align: left;
+      font-family: 'Times New Roman', serif;
+      font-size: 1.75rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+    }
+
+    nav.sidebar {
+      width: 220px;
+      background: #1111;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    nav.sidebar button, nav.sidebar a {
+      background: none;
+      border: none;
+      color: #111;
+      font-size: 1rem;
+      text-align: left;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      padding-left: 1rem;
+    }
+
+    nav.sidebar button:hover, nav.sidebar a:hover {
+      color: var(--accent-color);
+    }
+
+    nav.sidebar hr {
+      border: 1px solid #666;
+    }
+
+    #logout {
+      color: var(--highlight-color);
+    }
+
+    main {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .booking-card, .gallery-card {
+      background-color: var(--card-bg);
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .booking-actions button, .gallery-card button {
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 0.3rem;
+      cursor: pointer;
+    }
+
+    .filter-bar {
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      nav.sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      nav.sidebar button, nav.sidebar a {
+        flex: 1;
+        text-align: center;
+      }
+    }

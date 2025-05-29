@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="style-user-dashboard.css" />
+</head>
+<body>
+  <header onclick="location.href='user-mainpage.html'">My Studio</header>
+
+  <div class="container">
+    <nav class="sidebar">
+      <button onclick="showSection('bookings')">My Bookings</button>
+      <button onclick="showSection('gallery')">Gallery</button>
+      <hr />
+      <button id="logout" onclick="logout()">Logout</button>
+    </nav>
+
+    <main>
+      <section id="bookings" class="section active">
+        <div class="filter-bar">
+          <label for="sort">Sort by: </label>
+          <select id="sort" onchange="sortBookings()">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+        <div id="booking-list">
+          <!-- Example booking -->
+          <div class="booking-card">
+            <p><strong>Session:</strong> Portrait - 2025-05-20</p>
+            <p><strong>Status:</strong> Scheduled</p>
+            <div class="booking-actions">
+              <button>Edit</button>
+              <button>Print Official Receipt</button>
+              <button>Cancel</button>
+            </div>
+          </div>
+
+          <div class="booking-card">
+            <p><strong>Session:</strong> Wedding - 2025-04-12</p>
+            <p><strong>Status:</strong> Completed</p>
+            <div class="booking-actions">
+              <button>Leave Review</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gallery" class="section">
+        <div class="gallery-card">
+          <p><strong>Event:</strong> Engagement Shoot - 2025-04-12</p>
+          <button>Download Album</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script-user-dashboard.js"></script>
+</body>
+</html>
