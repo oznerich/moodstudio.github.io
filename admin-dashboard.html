@@ -95,44 +95,52 @@
         </section>
 
         <!-- Appointments -->
-        <section id="appointments" class="tab">
-          <h2>Your Appointments</h2>
-          <div class="user-form">
-            <h3>Add Appointment</h3>
-            <form id="addAppointmentForm">
-              <div class="form-group">
-                <input type="text" placeholder="Full Name" required />
-                <input type="tel" placeholder="Phone Number" required />
-              </div>
-              <div class="form-group">
-                <input type="email" placeholder="Email" required />
-                <select required>
-                  <option value="">Select Package</option>
-                  <option value="keepsake">Keepsake</option>
-                  <option value="serendipity">Serendipity</option>
-                  <option value="euphoria">Euphoria</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <input type="time" id="appointmentTime" required />
-                <input type="date" id="appointmentDate" required />
-              </div>
-              <button type="submit">Add Appointment</button>
-            </form>
-          </div>
+<!-- Appointments -->
+<section id="appointments" class="tab">
+  <h2>Your Appointments</h2>
+  <div class="user-form">
+    <h3>Add Appointment</h3>
+    <form id="addAppointmentForm">
+      <div class="form-group">
+        <input type="text" id="appointmentFirstName" placeholder="First Name" required />
+        <input type="text" id="appointmentLastName" placeholder="Last Name" />
+      </div>
+      <div class="form-group">
+        <input type="email" id="appointmentEmail" placeholder="Email" required />
+        <input type="tel" id="appointmentPhone" placeholder="Phone Number" required />
+      </div>
+      <div class="form-group">
+        <select id="appointmentPackage" required>
+          <option value="">Select Package</option>
+          <option value="keepsake">Keepsake</option>
+          <option value="serendipity">Serendipity</option>
+          <option value="euphoria">Euphoria</option>
+        </select>
+        <input type="date" id="appointmentDate" required />
+      </div>
+      <div class="form-group">
+        <input type="time" id="appointmentTime" required />
+        <select id="appointmentPaymentStatus">
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="number" id="appointmentTotalPrice" placeholder="Total Price" step="0.01" />
+        <input type="text" id="appointmentPaymentMethod" placeholder="Payment Method" />
+      </div>
+      <button type="submit">Add Appointment</button>
+    </form>
+  </div>
 
-          <div style="height: 2rem;"></div>
+  <div style="height: 2rem;"></div>
 
-          <div class="edit-users">
-            <h3>All Appointments</h3>
-            <ul class="user-list" id="all-appointments"></ul>
-          </div>
-
-          <div class="edit-users">
-            <h3>Pending Appointments</h3>
-            <ul class="user-list" id="pending-appointments"></ul>
-          </div>
-        </section>
+  <div class="edit-users">
+    <h3>All Appointments</h3>
+    <ul class="user-list" id="all-appointments"></ul>
+  </div>
+</section>
 
         <!-- Booking History -->
         <section id="booking-history" class="tab">
