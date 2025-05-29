@@ -15,12 +15,12 @@
 
       <div class="dashboard-content">
         <aside class="sidebar">
-          <ul>
-            <li class="sidebar-item active" onclick="showTab('dashboard', this)">Dashboard</li>
-            <li class="sidebar-item" onclick="showTab('appointments', this)">Appointments</li>
-            <li class="sidebar-item" onclick="showTab('booking-history', this)">Booking History</li>
-            <li class="sidebar-item" onclick="showTab('user-management', this)">User Management</li>
-            <li class="sidebar-item" onclick="showTab('gallery', this)">Gallery</li>
+          <ul id="sidebar-list">
+            <li class="sidebar-item active" data-tab="dashboard">Dashboard</li>
+            <li class="sidebar-item" data-tab="appointments">Appointments</li>
+            <li class="sidebar-item" data-tab="booking-history">Booking History</li>
+            <li class="sidebar-item" data-tab="user-management">User Management</li>
+            <li class="sidebar-item" data-tab="gallery">Gallery</li>
           </ul>
         </aside>
 
@@ -154,7 +154,7 @@
                   <input type="password" id="password" placeholder="Password" required />
                 </div>
                 <div class="form-group show-pass">
-                  <label><input type="checkbox" onclick="togglePassword()" /> Show Password</label>
+                  <label><input type="checkbox" /> Show Password</label>
                 </div>
                 <button type="submit">Add User</button>
               </form>
