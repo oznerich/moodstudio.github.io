@@ -94,12 +94,13 @@
           </div>
         </section>
 
-        <!-- Appointments -->
 <!-- Appointments -->
 <section id="appointments" class="tab">
   <h2>Your Appointments</h2>
-  <div class="user-form">
-    <h3>Add Appointment</h3>
+  
+  <!-- Appointment Form (hidden by default) -->
+  <div class="user-form" id="appointmentFormContainer" style="display: none;">
+    <h3 id="appointmentFormTitle">Add Appointment</h3>
     <form id="addAppointmentForm">
       <div class="form-group">
         <input type="text" id="appointmentFirstName" placeholder="First Name" required />
@@ -116,28 +117,33 @@
           <option value="serendipity">Serendipity</option>
           <option value="euphoria">Euphoria</option>
         </select>
-        <input type="date" id="appointmentDate" required />
-      </div>
-      <div class="form-group">
-        <input type="time" id="appointmentTime" required />
-        <select id="appointmentPaymentStatus">
+        <select id="appointmentPaymentStatus" required>
           <option value="Pending">Pending</option>
           <option value="Paid">Paid</option>
           <option value="Cancelled">Cancelled</option>
         </select>
       </div>
       <div class="form-group">
-        <input type="number" id="appointmentTotalPrice" placeholder="Total Price" step="0.01" />
+        <input type="date" id="appointmentDate" required />
+        <input type="time" id="appointmentTime" required />
+      </div>
+      <div class="form-group">
+        <input type="number" id="appointmentTotalPrice" placeholder="Total Price (₱)" step="0.01" min="0" />
         <input type="text" id="appointmentPaymentMethod" placeholder="Payment Method" />
       </div>
-      <button type="submit">Add Appointment</button>
+      <div class="form-group">
+        <button type="submit" id="appointmentSubmitBtn">Add Appointment</button>
+        <button type="button" id="cancelEditBtn" style="margin-left: 10px; background-color: #dc3545;">Cancel</button>
+      </div>
     </form>
   </div>
 
-  <div style="height: 2rem;"></div>
-
+  <!-- Appointment List -->
   <div class="edit-users">
-    <h3>All Appointments</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3>All Appointments</h3>
+      <button onclick="showAppointmentForm()" class="edit-btn">+ Add New Appointment</button>
+    </div>
     <ul class="user-list" id="all-appointments"></ul>
   </div>
 </section>
