@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Photography Studio Booking</title>
   <link rel="stylesheet" href="style-booking.css" />
+  <style>
+    .gcash-qr {
+      display: none;
+      margin: 20px auto;
+      text-align: center;
+    }
+    .gcash-qr img {
+      max-width: 200px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
@@ -72,10 +83,24 @@
     <div class="form-group"><input id="last-name" type="text" placeholder="Last Name"></div>
     <div class="form-group"><input id="email" type="email" placeholder="Email *" required></div>
     <div class="form-group"><input id="phone" type="tel" placeholder="Phone Number *" required></div>
-    <button class="submit-btn" onclick="submitBooking()">Request Booking</button>
+
+    <div class="form-group">
+      <label for="payment-method">Payment Method *</label>
+      <select id="payment-method" required onchange="toggleGcashQR(this.value)">
+        <option value="">-- Choose --</option>
+        <option value="GCash">GCash</option>
+        <option value="Cash On-Site">Cash On-Site</option>
+      </select>
+    </div>
+
+    <div class="gcash-qr" id="gcash-qr">
+      <p>Scan the QR code to simulate GCash payment:</p>
+      <img src="gcash-placeholder-qr.png" alt="GCash QR Code">
+    </div>
+
+    <button class="submit-btn" onclick="startPayment()">Pay & Confirm Booking</button>
   </section>
 
-  <!-- Load the Supabase booking script -->
   <script type="module" src="script-booking.js"></script>
 </body>
 </html>
