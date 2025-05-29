@@ -14,6 +14,10 @@ window.editUser = editUser;
 window.deleteUser = deleteUser;
 window.togglePassword = togglePassword;
 window.filterBookings = filterBookings;
+window.showAppointmentForm = showAppointmentForm;
+window.editAppointment = editAppointment;
+window.deleteAppointment = deleteAppointment;
+window.cancelAppointmentEdit = cancelAppointmentEdit;
 
 //
 // TAB SWITCHING
@@ -102,9 +106,19 @@ async function countBookingsByPackage(packageName) {
 // APPOINTMENTS
 //
 
-//
-// APPOINTMENTS
-//
+function showAppointmentForm() {
+  const container = document.getElementById('appointmentFormContainer');
+  document.getElementById('appointmentFormTitle').textContent = 'Add Appointment';
+  document.getElementById('appointmentSubmitBtn').textContent = 'Add Appointment';
+  document.getElementById('addAppointmentForm').reset();
+  delete document.getElementById('addAppointmentForm').dataset.editingId;
+  container.style.display = 'block';
+}
+
+function cancelAppointmentEdit() {
+  document.getElementById('appointmentFormContainer').style.display = 'none';
+  document.getElementById('addAppointmentForm').reset();
+}
 
 async function loadAppointments() {
   try {
@@ -119,24 +133,33 @@ async function loadAppointments() {
     const allAppointmentsList = document.getElementById('all-appointments');
     allAppointmentsList.innerHTML = '';
 
+    if (allAppointments.length === 0) {
+      allAppointmentsList.innerHTML = '<li>No appointments found</li>';
+      return;
+    }
+
     allAppointments.forEach(appointment => {
       const li = document.createElement('li');
       li.className = 'user-item';
       li.dataset.id = appointment.id;
       
+      // Format date for display
+      const appointmentDate = new Date(appointment.date);
+      const formattedDate = appointmentDate.toLocaleDateString('en-PH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
       li.innerHTML = `
         <div class="appointment-info">
           <strong>${appointment.first_name} ${appointment.last_name || ''}</strong>
           <div>${appointment.email} | ${appointment.phone}</div>
-          <div>${appointment.package_name} on ${appointment.date} at ${appointment.time}</div>
-          <div>Status: ${appointment.payment_status} | $${appointment.total_price || '0'}</div>
+          <div>${appointment.package_name} on ${formattedDate} at ${appointment.time}</div>
+          <div>Status: <span class="status-badge ${appointment.payment_status.toLowerCase()}">${appointment.payment_status}</span> | ₱${appointment.total_price ? appointment.total_price.toLocaleString('en-PH') : '0'}</div>
+          ${appointment.payment_method ? `<div>Payment: ${appointment.payment_method}</div>` : ''}
         </div>
         <div class="appointment-actions">
-          <select class="status-select" onchange="updateAppointmentStatus('${appointment.id}', this.value)">
-            <option value="Pending" ${appointment.payment_status === 'Pending' ? 'selected' : ''}>Pending</option>
-            <option value="Paid" ${appointment.payment_status === 'Paid' ? 'selected' : ''}>Paid</option>
-            <option value="Cancelled" ${appointment.payment_status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
           <button class="edit-btn" onclick="editAppointment('${appointment.id}')">Edit</button>
           <button class="edit-btn" style="background-color:#dc3545" onclick="deleteAppointment('${appointment.id}')">Delete</button>
         </div>
@@ -146,6 +169,7 @@ async function loadAppointments() {
     });
   } catch (error) {
     console.error('Error loading appointments:', error);
+    document.getElementById('all-appointments').innerHTML = '<li class="error">Error loading appointments</li>';
   }
 }
 
@@ -171,8 +195,10 @@ async function editAppointment(appointmentId) {
     form.querySelector('#appointmentTotalPrice').value = appointment.total_price || '';
     form.querySelector('#appointmentPaymentMethod').value = appointment.payment_method || '';
 
-    form.querySelector('button[type="submit"]').textContent = 'Update Appointment';
+    document.getElementById('appointmentFormTitle').textContent = 'Edit Appointment';
+    document.getElementById('appointmentSubmitBtn').textContent = 'Update Appointment';
     form.dataset.editingId = appointmentId;
+    document.getElementById('appointmentFormContainer').style.display = 'block';
   } catch (error) {
     alert('Error loading appointment: ' + error.message);
   }
@@ -193,26 +219,6 @@ async function deleteAppointment(appointmentId) {
     loadAppointments();
   } catch (error) {
     alert('Error deleting appointment: ' + error.message);
-  }
-}
-
-async function updateAppointmentStatus(appointmentId, newStatus) {
-  try {
-    const { error } = await supabase
-      .from('appointments')
-      .update({ 
-        payment_status: newStatus,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', appointmentId);
-    
-    if (error) throw error;
-    
-    // Optional: Show a success message or update UI
-  } catch (error) {
-    alert('Error updating appointment status: ' + error.message);
-    // Reload to reset to previous state
-    loadAppointments();
   }
 }
 
@@ -266,14 +272,14 @@ addAppointmentForm.addEventListener('submit', async (e) => {
     }
 
     addAppointmentForm.reset();
-    delete addAppointmentForm.dataset.editingId;
-    addAppointmentForm.querySelector('button[type="submit"]').textContent = 'Add Appointment';
+    document.getElementById('appointmentFormContainer').style.display = 'none';
     loadAppointments();
 
   } catch (error) {
     alert('Error saving appointment: ' + error.message);
   }
 });
+
 
 //
 // BOOKING HISTORY
