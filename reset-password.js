@@ -1,14 +1,27 @@
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
   const supabase = window.supabase.createClient(
     'https://rdgahcjjbewvyqcfdtih.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU' // use anon key, NOT service role
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
   );
 
   const resetBtn = document.getElementById('reset-btn');
 
+  // ⛔ Disable button until session is confirmed
+  resetBtn.disabled = true;
+
+  // ✅ Wait for Supabase to detect session from URL
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (!sessionData.session || sessionError) {
+    showMessage("Invalid or expired reset link. Please request a new one.", true);
+    return;
+  }
+
+  // ✅ Enable button now that session is ready
+  resetBtn.disabled = false;
+
   resetBtn.addEventListener('click', async function () {
     const password = document.getElementById('new-password').value.trim();
-    const messageEl = document.getElementById('message');
 
     if (password.length < 6) {
       showMessage("Password must be at least 6 characters", true);
@@ -16,7 +29,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     try {
-      // Supabase auto-initializes session from URL on password reset
       const { data: user, error: updateError } = await supabase.auth.updateUser({
         password: password
       });
