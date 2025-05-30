@@ -441,3 +441,22 @@ h5, p {
   padding: 1rem;
   border-radius: 8px;
 }
+
+/* Show Password Checkbox Styles */
+.show-pass {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.show-pass input[type="checkbox"] {
+  margin: 0;
+  width: auto;
+}
+
+.show-pass label {
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
