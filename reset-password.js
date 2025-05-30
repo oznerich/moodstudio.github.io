@@ -1,53 +1,61 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const supabase = window.supabase.createClient(
+document.addEventListener('DOMContentLoaded', () => {
+  const supabase = supabase.createClient(
     'https://rdgahcjjbewvyqcfdtih.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU' // replace with your anon key
   );
 
-  const messageEl = document.getElementById('message');
-  const resetBtn = document.getElementById('reset-btn');
+  const emailInput = document.getElementById('email');
+  const otpInput = document.getElementById('otp');
   const passwordInput = document.getElementById('new-password');
+  const resetBtn = document.getElementById('reset-btn');
+  const messageEl = document.getElementById('message');
 
-  // Extract access_token from URL hash
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
-  const access_token = hashParams.get('access_token');
-
-  if (!access_token) {
-    showMessage('Invalid or missing reset token. Please request a new reset email.', true);
-    resetBtn.disabled = true;
-    passwordInput.disabled = true;
-    return;
+  function showMessage(msg, isError = false) {
+    messageEl.textContent = msg;
+    messageEl.className = isError ? 'error' : 'success';
   }
 
-  // Set the Supabase session with the access_token from URL hash
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token,
-    refresh_token: access_token,
-  });
-
-  if (sessionError) {
-    showMessage('Session error: ' + sessionError.message, true);
-    resetBtn.disabled = true;
-    passwordInput.disabled = true;
-    return;
-  }
-
-  // On button click, update password
   resetBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const otp = otpInput.value.trim();
     const newPassword = passwordInput.value.trim();
 
+    if (!email) {
+      showMessage('Please enter your email.', true);
+      return;
+    }
+    if (!otp || otp.length !== 6) {
+      showMessage('Please enter the 6-digit code from your email.', true);
+      return;
+    }
     if (newPassword.length < 6) {
       showMessage('Password must be at least 6 characters.', true);
       return;
     }
 
     resetBtn.disabled = true;
-    showMessage('Updating password...', false);
+    showMessage('Verifying code and resetting password...', false);
 
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    // Step 1: Verify OTP token
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+      email: email,
+      token: otp,
+      type: 'recovery',
+    });
+
+    if (verifyError) {
+      showMessage('Failed to verify code: ' + verifyError.message, true);
+      resetBtn.disabled = false;
+      return;
+    }
+
+    // Step 2: Update password for the logged in user
+    const { data: user, error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
 
     if (updateError) {
-      showMessage('Error updating password: ' + updateError.message, true);
+      showMessage('Failed to update password: ' + updateError.message, true);
       resetBtn.disabled = false;
       return;
     }
@@ -55,12 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     showMessage('Password updated successfully! Redirecting...', false);
 
     setTimeout(() => {
-      window.location.href = '/'; // Redirect after success
+      window.location.href = '/'; // Redirect to home or login page
     }, 1500);
   });
-
-  function showMessage(text, isError) {
-    messageEl.textContent = text;
-    messageEl.className = isError ? 'error' : 'success';
-  }
 });
+
