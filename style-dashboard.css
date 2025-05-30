@@ -642,3 +642,29 @@ h5, p {
     display: none;
   }
 }
+
+/* Add these styles to your existing CSS */
+
+/* Status Colors */
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Image in Modal */
+.modal-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
