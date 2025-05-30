@@ -1,57 +1,66 @@
-document.addEventListener('DOMContentLoaded', async function () {
-  const supabase = window.supabase.createClient(
+(async () => {
+  const supabase = supabase.createClient(
     'https://rdgahcjjbewvyqcfdtih.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
   );
 
+  const messageEl = document.getElementById('message');
   const resetBtn = document.getElementById('reset-btn');
+  const passwordInput = document.getElementById('new-password');
 
-  // ⛔ Disable button until session is confirmed
-  resetBtn.disabled = true;
+  // Extract access_token from URL hash
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const access_token = hashParams.get('access_token');
 
-  // ✅ Wait for Supabase to detect session from URL
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
-  if (!sessionData.session || sessionError) {
-    showMessage("Invalid or expired reset link. Please request a new one.", true);
+  if (!access_token) {
+    showMessage('Invalid or missing reset token. Please request a new reset email.', true);
+    resetBtn.disabled = true;
+    passwordInput.disabled = true;
     return;
   }
 
-  // ✅ Enable button now that session is ready
-  resetBtn.disabled = false;
+  // Set the Supabase session with the access_token from URL hash
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token,
+    refresh_token: access_token,
+  });
 
-  resetBtn.addEventListener('click', async function () {
-    const password = document.getElementById('new-password').value.trim();
+  if (sessionError) {
+    showMessage('Session error: ' + sessionError.message, true);
+    resetBtn.disabled = true;
+    passwordInput.disabled = true;
+    return;
+  }
 
-    if (password.length < 6) {
-      showMessage("Password must be at least 6 characters", true);
+  // On button click, update password
+  resetBtn.addEventListener('click', async () => {
+    const newPassword = passwordInput.value.trim();
+
+    if (newPassword.length < 6) {
+      showMessage('Password must be at least 6 characters.', true);
       return;
     }
 
-    try {
-      const { data: user, error: updateError } = await supabase.auth.updateUser({
-        password: password
-      });
+    resetBtn.disabled = true;
+    showMessage('Updating password...', false);
 
-      if (updateError) throw updateError;
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
 
-      showMessage("Password updated successfully! Redirecting...", false);
-      setTimeout(() => window.location.href = "/", 1500);
-
-    } catch (error) {
-      console.error("Reset error:", error);
-      showMessage(
-        error.message.includes("JWT") ? 
-          "Expired or invalid link. Please request a new reset email." : 
-          error.message || "Failed to reset password",
-        true
-      );
+    if (updateError) {
+      showMessage('Error updating password: ' + updateError.message, true);
+      resetBtn.disabled = false;
+      return;
     }
+
+    showMessage('Password updated successfully! Redirecting...', false);
+
+    setTimeout(() => {
+      window.location.href = '/'; // Redirect after success
+    }, 1500);
   });
 
   function showMessage(text, isError) {
-    const el = document.getElementById('message');
-    el.textContent = text;
-    el.className = isError ? 'error' : 'success';
+    messageEl.textContent = text;
+    messageEl.className = isError ? 'error' : 'success';
   }
-});
+})();
