@@ -1,7 +1,8 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://rdgahcjjbewvyqcfdtih.supabase.co";
-const SUPABASE_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU";
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function handleSession() {
@@ -14,7 +15,6 @@ async function handleSession() {
   }
 
   const { error } = await supabase.auth.setSession({ access_token });
-
   if (error) {
     alert("Error setting session: " + error.message);
     return false;
@@ -23,8 +23,7 @@ async function handleSession() {
 }
 
 async function resetPassword() {
-  const passwordInput = document.getElementById("new-password");
-  const newPassword = passwordInput.value.trim();
+  const newPassword = document.getElementById("new-password").value.trim();
 
   if (!newPassword) {
     alert("Please enter a new password.");
@@ -32,17 +31,13 @@ async function resetPassword() {
   }
 
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-
   if (error) {
     alert("Error updating password: " + error.message);
   } else {
     alert("Password updated successfully! Redirecting to login...");
-    window.location.href = "index.html"; // redirect to your login page
+    window.location.href = "index.html";
   }
 }
 
-// On page load, set session from access token
 handleSession();
-
-// Attach event listener to button
 document.getElementById("submit-btn").addEventListener("click", resetPassword);
