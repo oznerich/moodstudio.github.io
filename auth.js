@@ -118,13 +118,13 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
   const role = profile?.role;
 
   // Redirect based on role
-  const role = profile?.role?.trim();
+  const role = profile?.role?.trim().toLowerCase();
 
-  console.log("User role:", role);  // Debug log
-  
-  if (role?.toLowerCase() === "super admin") {
+  console.log("User role:", role); // ✅ Debug output
+
+  if (role === "super admin") {
     window.location.href = "superadmin-dashboard.html";
-  } else if (role?.toLowerCase() === "admin") {
+  } else if (role === "admin") {
     window.location.href = "admin-dashboard.html";
   } else {
     window.location.href = "user-mainpage.html";
