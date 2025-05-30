@@ -118,16 +118,17 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
   const role = profile?.role;
 
   // Redirect based on role
-  switch (role.toLowerCase()) {
-  case "super admin":
+  const role = profile?.role?.trim();
+
+  console.log("User role:", role);  // Debug log
+  
+  if (role?.toLowerCase() === "super admin") {
     window.location.href = "superadmin-dashboard.html";
-    break;
-  case "admin":
+  } else if (role?.toLowerCase() === "admin") {
     window.location.href = "admin-dashboard.html";
-    break;
-  default:
+  } else {
     window.location.href = "user-mainpage.html";
-}
+  }
 });
 
 // Forgot Password
