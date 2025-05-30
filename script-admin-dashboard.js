@@ -173,15 +173,6 @@ async function loadAppointments() {
   }
 }
 
-document.getElementById('upload-btn').onclick = uploadPhoto;
-
-  // Setup sort select change event for bookings
-  const sortSelect = document.getElementById('sort');
-  if (sortSelect) {
-    sortSelect.onchange = sortBookings;
-  }
-});
-
 async function editAppointment(appointmentId) {
   try {
     const { data: appointment, error } = await supabase
