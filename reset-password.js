@@ -22,11 +22,8 @@ resetBtn.addEventListener('click', async () => {
     return;
   }
 
-  // Step 1: Find user by email
-  const { data: users, error: fetchError } = await supabase.auth.admin.listUsers({
+  const { data, error: fetchError } = await supabase.auth.admin.listUsers({
     email: email,
-    // optional limit 1 for efficiency
-    // limit: 1 
   });
 
   if (fetchError) {
@@ -34,14 +31,15 @@ resetBtn.addEventListener('click', async () => {
     return;
   }
 
+  const users = data?.users;
+
   if (!users || users.length === 0) {
     showMessage('No user found with that email.', true);
     return;
   }
 
-  const user = users[0]; // get first user matching email
+  const user = users[0];
 
-  // Step 2: Reset password by user ID
   const { error: resetError } = await supabase.auth.admin.updateUserById(user.id, {
     password: newPassword,
   });
