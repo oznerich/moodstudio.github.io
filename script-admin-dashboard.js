@@ -1,8 +1,8 @@
-// Import Supabase client
+// script-admin-dashboard.js
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
-const SUPABASE_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let isEditing = false;
@@ -19,9 +19,7 @@ window.editAppointment = editAppointment;
 window.deleteAppointment = deleteAppointment;
 window.cancelAppointmentEdit = cancelAppointmentEdit;
 
-//
-// TAB SWITCHING
-//
+// Tab Switching
 function showTab(tabId, element) {
   document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
   document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
@@ -30,43 +28,35 @@ function showTab(tabId, element) {
   if (activeTab) activeTab.classList.add("active");
   if (element) element.classList.add("active");
 
-  // Load relevant data when switching tabs
   if (tabId === 'user-management') loadUsers();
   if (tabId === 'appointments') loadAppointments();
   if (tabId === 'booking-history') loadBookings();
   if (tabId === 'dashboard') loadDashboardAnalytics();
 }
 
-//
-// DASHBOARD ANALYTICS
-//
+// Dashboard Analytics
 async function loadDashboardAnalytics() {
   try {
-    // Fetch counts from bookings table for analytics
-    // Adjust table and columns names to your schema
-
     const { count: newBookingsCount } = await supabase
-      .from('bookings')
+      .from('appointments')
       .select('*', { count: 'exact' })
-      .eq('status', 'new');
+      .eq('payment_status', 'Pending');
 
     const { count: refundBookingsCount } = await supabase
-      .from('bookings')
+      .from('appointments')
       .select('*', { count: 'exact' })
-      .eq('status', 'refund');
+      .eq('payment_status', 'Cancelled');
 
     const { count: userQueueCount } = await supabase
       .from('profiles')
       .select('*', { count: 'exact' });
 
-    // Set counts in dashboard
     document.getElementById('new-bookings').textContent = newBookingsCount ?? 0;
     document.getElementById('refund-bookings').textContent = refundBookingsCount ?? 0;
     document.getElementById('user-queue').textContent = userQueueCount ?? 0;
 
-    // Booking Analytics - total bookings & reviews count
     const { count: totalBookings } = await supabase
-      .from('bookings')
+      .from('appointments')
       .select('*', { count: 'exact' });
 
     const { count: reviewsCount } = await supabase
@@ -76,7 +66,6 @@ async function loadDashboardAnalytics() {
     document.getElementById('total-bookings').textContent = totalBookings ?? 0;
     document.getElementById('reviews-count').textContent = reviewsCount ?? 0;
 
-    // Availed Packages counts for Keepsake, Euphoria, Serendipity
     const keepsakeCount = await countBookingsByPackage('keepsake');
     const euphoriaCount = await countBookingsByPackage('euphoria');
     const serendipityCount = await countBookingsByPackage('serendipity');
@@ -93,19 +82,16 @@ async function loadDashboardAnalytics() {
 async function countBookingsByPackage(packageName) {
   try {
     const { count } = await supabase
-      .from('bookings')
+      .from('appointments')
       .select('*', { count: 'exact' })
-      .eq('package', packageName);
+      .eq('package_name', packageName);
     return count ?? 0;
   } catch {
     return 0;
   }
 }
 
-//
-// APPOINTMENTS
-//
-
+// Appointments
 function showAppointmentForm() {
   const container = document.getElementById('appointmentFormContainer');
   document.getElementById('appointmentFormTitle').textContent = 'Add Appointment';
@@ -143,7 +129,6 @@ async function loadAppointments() {
       li.className = 'user-item';
       li.dataset.id = appointment.id;
       
-      // Format date for display
       const appointmentDate = new Date(appointment.date);
       const formattedDate = appointmentDate.toLocaleDateString('en-PH', {
         year: 'numeric',
@@ -222,7 +207,6 @@ async function deleteAppointment(appointmentId) {
   }
 }
 
-// Handle adding/updating appointment form submit
 const addAppointmentForm = document.getElementById('addAppointmentForm');
 addAppointmentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -249,7 +233,6 @@ addAppointmentForm.addEventListener('submit', async (e) => {
 
   try {
     if (addAppointmentForm.dataset.editingId) {
-      // Update existing appointment
       const { error } = await supabase
         .from('appointments')
         .update(formData)
@@ -259,7 +242,6 @@ addAppointmentForm.addEventListener('submit', async (e) => {
       
       alert('Appointment updated successfully!');
     } else {
-      // Create new appointment
       formData.created_at = new Date().toISOString();
       
       const { error } = await supabase
@@ -280,24 +262,12 @@ addAppointmentForm.addEventListener('submit', async (e) => {
   }
 });
 
-
-//
-// BOOKING HISTORY
-//
-
-// Booking History Variables
+// Booking History
 let currentPage = 1;
 const bookingsPerPage = 10;
 let allAppointments = [];
 
-// Initialize Booking History
-async function initBookingHistory() {
-  await loadAppointments();
-  setupEventListeners();
-}
-
-// Load Appointments from Supabase
-async function loadAppointments(filter = 'all', searchQuery = '') {
+async function loadBookings(filter = 'all', searchQuery = '') {
   try {
     let query = supabase
       .from('appointments')
@@ -305,7 +275,6 @@ async function loadAppointments(filter = 'all', searchQuery = '') {
       .order('date', { ascending: false })
       .order('time', { ascending: false });
 
-    // Apply filters
     if (filter !== 'all') {
       const now = new Date();
       let fromDate = new Date();
@@ -325,16 +294,13 @@ async function loadAppointments(filter = 'all', searchQuery = '') {
           fromDate.setHours(0, 0, 0, 0);
           query = query.gte('date', fromDate.toISOString().split('T')[0]);
           break;
-        case 'completed':
-          query = query.eq('payment_status', 'Paid');
-          break;
-        case 'cancelled':
-          query = query.eq('payment_status', 'Cancelled');
+        case 'Paid':
+        case 'Cancelled':
+          query = query.eq('payment_status', filter);
           break;
       }
     }
 
-    // Apply search
     if (searchQuery) {
       query = query.or(
         `first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`
@@ -355,7 +321,6 @@ async function loadAppointments(filter = 'all', searchQuery = '') {
   }
 }
 
-// Render Appointments to UI
 function renderAppointments() {
   const startIdx = (currentPage - 1) * bookingsPerPage;
   const endIdx = startIdx + bookingsPerPage;
@@ -396,7 +361,6 @@ function renderAppointments() {
   updatePagination();
 }
 
-// Show Appointment Details Modal
 async function showAppointmentDetails(appointmentId) {
   try {
     const { data: appointment, error } = await supabase
@@ -464,7 +428,6 @@ async function showAppointmentDetails(appointmentId) {
   }
 }
 
-// Update Booking Stats
 function updateBookingStats() {
   const totalAppointments = allAppointments.length;
   const totalRevenue = allAppointments.reduce((sum, appt) => sum + (appt.total_price || 0), 0);
@@ -476,7 +439,6 @@ function updateBookingStats() {
     `₱${totalRevenue.toLocaleString('en-PH')} revenue`;
 }
 
-// Update Pagination Controls
 function updatePagination() {
   const totalPages = Math.ceil(allAppointments.length / bookingsPerPage);
   document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
@@ -484,7 +446,6 @@ function updatePagination() {
   document.getElementById('nextPage').disabled = currentPage >= totalPages;
 }
 
-// Export Appointments to CSV
 async function exportAppointments() {
   try {
     const { data: appointments, error } = await supabase
@@ -499,7 +460,6 @@ async function exportAppointments() {
       return;
     }
 
-    // Create CSV content
     const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Package', 'Date', 'Time', 'Status', 'Amount', 'Payment Method'];
     const csvRows = [
       headers.join(','),
@@ -517,7 +477,6 @@ async function exportAppointments() {
       ].join(','))
     ];
 
-    // Download CSV
     const csvContent = csvRows.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -533,21 +492,17 @@ async function exportAppointments() {
   }
 }
 
-// Setup Event Listeners
 function setupEventListeners() {
-  // Filter change
   document.getElementById('bookingFilter').addEventListener('change', (e) => {
     currentPage = 1;
-    loadAppointments(e.target.value, document.getElementById('bookingSearch').value);
+    loadBookings(e.target.value, document.getElementById('bookingSearch').value);
   });
 
-  // Search input
   document.getElementById('bookingSearch').addEventListener('input', (e) => {
     currentPage = 1;
-    loadAppointments(document.getElementById('bookingFilter').value, e.target.value);
+    loadBookings(document.getElementById('bookingFilter').value, e.target.value);
   });
 
-  // Pagination
   document.getElementById('prevPage').addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
@@ -563,10 +518,8 @@ function setupEventListeners() {
     }
   });
 
-  // Export button
   document.getElementById('exportBookings').addEventListener('click', exportAppointments);
 
-  // Modal close
   document.querySelector('.close-modal').addEventListener('click', closeModal);
   window.addEventListener('click', (e) => {
     if (e.target === document.getElementById('bookingModal')) {
@@ -575,20 +528,16 @@ function setupEventListeners() {
   });
 }
 
-// Close Modal
 function closeModal() {
   document.getElementById('bookingModal').style.display = 'none';
 }
 
-// Initialize when booking history tab is shown
-function loadBookings() {
-  initBookingHistory();
+function filterBookings() {
+  const filter = document.getElementById('bookingFilter').value;
+  loadBookings(filter);
 }
 
-//
-// USER MANAGEMENT
-//
-
+// User Management
 async function loadUsers() {
   try {
     const { data: users, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -621,7 +570,7 @@ async function editUser(userId) {
     form.querySelector('input[placeholder="Birthday"]').value = user.birthday || '';
     form.querySelector('input[placeholder="Contact No."]').value = user.contact || '';
     form.querySelector('input[type="email"]').value = user.email || '';
-    form.querySelector('#password').value = ''; // clear password on edit
+    form.querySelector('#password').value = '';
 
     form.querySelector('button[type="submit"]').textContent = 'Update User';
     cancelEditBtn.style.display = 'inline-block';
@@ -651,7 +600,6 @@ function togglePassword() {
   pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
 }
 
-// Add or update user on form submit
 const addUserForm = document.getElementById('addUserForm');
 const cancelEditBtn = document.createElement('button');
 cancelEditBtn.textContent = 'Cancel Edit';
@@ -680,77 +628,4 @@ addUserForm.addEventListener('submit', async (e) => {
   if (!firstName || !lastName || !birthday || !contact || !email || (!isEditing && !password)) {
     alert('Please fill all required fields.');
     return;
-  }
-
-  try {
-    if (isEditing) {
-      // Update user profile
-      const updates = {
-        first_name: firstName,
-        last_name: lastName,
-        birthday: birthday,
-        contact: contact,
-        email: email,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase.from('profiles').update(updates).eq('id', editingUserId);
-      if (error) throw error;
-
-      alert('User updated successfully!');
-    } else {
-      // Register user via auth + insert profile
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (authError) throw authError;
-
-      // Insert profile record
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: authData.user.id,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        birthday,
-        contact,
-        role: 'User',
-        created_at: new Date().toISOString(),
-      });
-
-      if (profileError) throw profileError;
-
-      alert('User registered successfully! Check email to verify.');
-    }
-
-    addUserForm.reset();
-    isEditing = false;
-    editingUserId = null;
-    addUserForm.querySelector('button[type="submit"]').textContent = 'Add User';
-    cancelEditBtn.style.display = 'none';
-
-    loadUsers();
-
-  } catch (error) {
-    alert('Error: ' + error.message);
-  }
-});
-
-//
-// GALLERY (static for now, can add dynamic later)
-//
-function loadGallery() {
-  const gallery = document.getElementById('gallery-content');
-  gallery.innerHTML = '<p>Gallery feature coming soon...</p>';
-}
-
-// Initial load
-showTab('dashboard', document.querySelector('.sidebar-item.active'));
-
-// Add event listeners to timeframe selects on dashboard to refresh counts if changed
-document.getElementById('analytics-timeframe').addEventListener('change', loadDashboardAnalytics);
-document.getElementById('package-timeframe').addEventListener('change', loadDashboardAnalytics);
-document.getElementById('cancelEditBtn').addEventListener('click', cancelAppointmentEdit);
-
-loadGallery();
+ 
