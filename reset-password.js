@@ -1,9 +1,20 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
 const supabase = createClient(
   'https://rdgahcjjbewvyqcfdtih.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU'
-)
+
+
+// This function reads the access token from URL and sets it for Supabase client
+function setSessionFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search)
+  const access_token = urlParams.get('access_token')
+  if (access_token) {
+    // Set session with the access token from reset link
+    supabase.auth.setSession({ access_token })
+  }
+}
+
+setSessionFromUrl()
 
 async function resetPassword() {
   const password = document.getElementById('new-password').value.trim()
@@ -22,5 +33,4 @@ async function resetPassword() {
   }
 }
 
-// Expose to global scope so onclick works in HTML
 window.resetPassword = resetPassword
