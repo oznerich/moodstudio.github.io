@@ -8,8 +8,13 @@ const supabase = createClient(
 async function setSessionFromUrl() {
   const urlParams = new URLSearchParams(window.location.search)
   const access_token = urlParams.get('access_token')
+  const refresh_token = urlParams.get('refresh_token') || access_token // fallback for reset flows
+
   if (access_token) {
-    const { error } = await supabase.auth.setSession({ access_token })
+    const { error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token
+    })
     if (error) {
       alert('Error setting session: ' + error.message)
       return false
