@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="style-superadmin-dashboard.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Mood Studios</h1>
+      <a href="auth.html" class="logout">Logout</a>
+    </header>
+
+    <div class="dashboard-content">
+      <aside class="sidebar">
+        <ul>
+          <li class="sidebar-item active" onclick="showTab('dashboard', this)">Dashboard</li>
+          <li class="sidebar-item" onclick="showTab('appointments', this)">Appointments</li>
+          <li class="sidebar-item" onclick="showTab('booking-history', this)">Booking History</li>
+          <li class="sidebar-item" onclick="showTab('user-management', this)">User Management</li>
+          <li class="sidebar-item" onclick="showTab('gallery', this)">Gallery</li>
+        </ul>
+      </aside>
+
+      <main class="main-content">
+        <!-- Dashboard Analytics -->
+        <section id="dashboard" class="tab active">
+          <h2>Welcome to your Dashboard!</h2>
+          <div class="user-form">
+            <div class="form-group dashboard-spacing">
+              <div class="edit-users">
+                <h5>New Bookings</h5>
+                <p id="new-bookings">0</p>
+              </div>
+              <div class="edit-users">
+                <h5>Refund Bookings</h5>
+                <p id="refund-bookings">0</p>
+              </div>
+              <div class="edit-users">
+                <h5>User Queue</h5>
+                <p id="user-queue">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="edit-users">
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="flex: 1; color: #007bff; margin: 0;">Booking Analytics</h3>
+              <select id="analytics-timeframe">
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+            </div>
+            <div class="form-group dashboard-spacing">
+              <div class="edit-users" style="flex: 1; color: #555555;">
+                <h5>Total Bookings</h5>
+                <p id="total-bookings">0</p>
+              </div>
+              <div class="edit-users" style="flex: 1; color: #555555;">
+                <h5>Reviews</h5>
+                <p id="reviews-count">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="edit-users">
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+              <h3 style="flex: 1; color: #007bff; margin: 0;">Availed Package</h3>
+              <select id="package-timeframe">
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+              </select>
+            </div>
+            <div class="form-group dashboard-spacing">
+              <div class="edit-users" style="flex: 1; color: #555555;">
+                <h5>Keepsake</h5>
+                <p id="keepsake-count">0</p>
+              </div>
+              <div class="edit-users" style="flex: 1; color: #555555;">
+                <h5>Euphoria</h5>
+                <p id="euphoria-count">0</p>
+              </div>
+              <div class="edit-users" style="flex: 1; color: #555555;">
+                <h5>Serendipity</h5>
+                <p id="serendipity-count">0</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+<!-- Appointments -->
+<section id="appointments" class="tab">
+  <h2>Your Appointments</h2>
+  
+  <!-- Appointment Form (hidden by default) -->
+  <div class="user-form" id="appointmentFormContainer" style="display: none;">
+    <h3 id="appointmentFormTitle">Add Appointment</h3>
+    <form id="addAppointmentForm">
+      <div class="form-group">
+        <input type="text" id="appointmentFirstName" placeholder="First Name" required />
+        <input type="text" id="appointmentLastName" placeholder="Last Name" />
+      </div>
+      <div class="form-group">
+        <input type="email" id="appointmentEmail" placeholder="Email" required />
+        <input type="tel" id="appointmentPhone" placeholder="Phone Number" required />
+      </div>
+      <div class="form-group">
+        <select id="appointmentPackage" required>
+          <option value="">Select Package</option>
+          <option value="keepsake">Keepsake</option>
+          <option value="serendipity">Serendipity</option>
+          <option value="euphoria">Euphoria</option>
+        </select>
+        <select id="appointmentPaymentStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="date" id="appointmentDate" required />
+        <input type="time" id="appointmentTime" required />
+      </div>
+      <div class="form-group">
+        <input type="number" id="appointmentTotalPrice" placeholder="Total Price (₱)" step="0.01" min="0" />
+        <input type="text" id="appointmentPaymentMethod" placeholder="Payment Method" />
+      </div>
+      <div class="form-group">
+        <button type="submit" id="appointmentSubmitBtn">Add Appointment</button>
+        <button type="button" id="cancelEditBtn" style="margin-left: 10px; background-color: #dc3545;">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Appointment List -->
+  <div class="edit-users">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3>All Appointments</h3>
+      <button onclick="showAppointmentForm()" class="edit-btn">+ Add New Appointment</button>
+    </div>
+    <ul class="user-list" id="all-appointments"></ul>
+  </div>
+</section>
+
+        <!-- Booking History -->
+        <section id="booking-history" class="tab">
+          <h2>Booking History</h2>
+          <div class="user-form">
+            <div class="form-group">
+              <select id="bookingFilter" onchange="filterBookings()">
+                <option value="all">All</option>
+                <option value="day">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-users" id="bookingList">
+            <h3>Successful Bookings</h3>
+            <ul class="user-list" id="bookings-list"></ul>
+          </div>
+        </section>
+
+        <!-- User Management -->
+        <section id="user-management" class="tab">
+          <h2>User Management</h2>
+          <div class="user-form">
+            <h3>Add User</h3>
+            <form id="addUserForm">
+              <div class="form-group">
+                <input type="text" placeholder="First Name" required />
+                <input type="text" placeholder="Last Name" required />
+              </div>
+              <div class="form-group">
+                <input type="date" placeholder="Birthday" required />
+                <input type="tel" placeholder="Contact No." required />
+              </div>
+              <div class="form-group">
+                <input type="email" placeholder="Email" required />
+                <input type="password" id="password" placeholder="Password" required />
+              </div>
+              <div class="form-group show-pass">
+                <label><input type="checkbox" onclick="togglePassword()" /> Show Password</label>
+              </div>
+              <button type="submit">Add User</button>
+            </form>
+          </div>
+
+          <div style="height: 2rem;"></div>
+
+          <div class="edit-users">
+            <h3>Users</h3>
+            <ul class="user-list" id="users-list"></ul>
+          </div>
+        </section>
+
+        <!-- Gallery -->
+        <section id="gallery" class="tab">
+          <h2>Gallery</h2>
+          <div id="gallery-content"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Import Supabase client as ES module -->
+  <script type="module" src="script-superadmin-dashboard.js"></script>
+</body>
+</html>
