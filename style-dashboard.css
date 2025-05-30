@@ -452,17 +452,9 @@ h5, p {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0;
-  flex-direction: row-reverse; /* This moves checkbox to the right */
-  justify-content: flex-end; /* Aligns items properly */
 }
 
 .show-pass input[type="checkbox"] {
-  margin: 0;
-  width: auto;
-  height: auto;
-  cursor: pointer;
-  order: 1; 
+  margin: 0 0 0 8px; /* Left margin only */
+  order: 1;
 }
