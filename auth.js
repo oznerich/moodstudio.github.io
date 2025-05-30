@@ -118,7 +118,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
   const role = profile?.role;
 
   // Redirect based on role
-  if (role === "Super Admin") {
+  if (role === "Superadmin") {
     window.location.href = "superadmin-dashboard.html";
   }
   else if (role === "Admin") {
