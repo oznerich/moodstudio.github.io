@@ -341,6 +341,7 @@ function filterBookings() {
 // USER MANAGEMENT
 //
 
+// User Management
 async function loadUsers() {
   try {
     const { data: users, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -373,7 +374,7 @@ async function editUser(userId) {
     form.querySelector('input[placeholder="Birthday"]').value = user.birthday || '';
     form.querySelector('input[placeholder="Contact No."]').value = user.contact || '';
     form.querySelector('input[type="email"]').value = user.email || '';
-    form.querySelector('#password').value = ''; // clear password on edit
+    form.querySelector('#password').value = ''; // Clear password field for security
 
     form.querySelector('button[type="submit"]').textContent = 'Update User';
     cancelEditBtn.style.display = 'inline-block';
@@ -384,6 +385,101 @@ async function editUser(userId) {
     alert('Error loading user data: ' + error.message);
   }
 }
+
+// Add or update user on form submit
+const addUserForm = document.getElementById('addUserForm');
+const cancelEditBtn = document.createElement('button');
+cancelEditBtn.textContent = 'Cancel Edit';
+cancelEditBtn.style.marginLeft = '10px';
+cancelEditBtn.style.display = 'none';
+addUserForm.appendChild(cancelEditBtn);
+
+cancelEditBtn.addEventListener('click', () => {
+  isEditing = false;
+  editingUserId = null;
+  addUserForm.reset();
+  addUserForm.querySelector('button[type="submit"]').textContent = 'Add User';
+  cancelEditBtn.style.display = 'none';
+});
+
+addUserForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const firstName = addUserForm.querySelector('input[placeholder="First Name"]').value.trim();
+  const lastName = addUserForm.querySelector('input[placeholder="Last Name"]').value.trim();
+  const birthday = addUserForm.querySelector('input[placeholder="Birthday"]').value;
+  const contact = addUserForm.querySelector('input[placeholder="Contact No."]').value.trim();
+  const email = addUserForm.querySelector('input[type="email"]').value.trim();
+  const password = addUserForm.querySelector('#password').value;
+
+  if (!firstName || !lastName || !birthday || !contact || !email || (!isEditing && !password)) {
+    alert('Please fill all required fields.');
+    return;
+  }
+
+  try {
+    if (isEditing) {
+      // Update user profile
+      const updates = {
+        first_name: firstName,
+        last_name: lastName,
+        birthday: birthday,
+        contact: contact,
+        email: email,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Update password if provided
+      if (password) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: password
+        });
+        if (passwordError) throw passwordError;
+      }
+
+      // Update profile
+      const { error } = await supabase.from('profiles').update(updates).eq('id', editingUserId);
+      if (error) throw error;
+
+      alert('User updated successfully!');
+    } else {
+      // Register new user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      // Insert profile record
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: authData.user.id,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        birthday,
+        contact,
+        role: 'User',
+        created_at: new Date().toISOString(),
+      });
+
+      if (profileError) throw profileError;
+
+      alert('User registered successfully! Check email to verify.');
+    }
+
+    addUserForm.reset();
+    isEditing = false;
+    editingUserId = null;
+    addUserForm.querySelector('button[type="submit"]').textContent = 'Add User';
+    cancelEditBtn.style.display = 'none';
+
+    loadUsers();
+
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+});
 
 async function deleteUser(userId) {
   if (!confirm('Are you sure you want to delete this user?')) return;
