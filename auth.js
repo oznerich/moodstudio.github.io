@@ -115,20 +115,29 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     return;
   }
 
-  const role = profile?.role;
+  // Fetch role from profiles table
+const { data: profile, error: profileError } = await supabase
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
+  .single();
 
-  // Redirect based on role
-  const role = profile?.role?.trim().toLowerCase();
+if (profileError) {
+  alert(`Failed to fetch profile: ${profileError.message}`);
+  return;
+}
 
-  console.log("User role:", role); // ✅ Debug output
+const role = profile?.role?.trim().toLowerCase(); // ✅ Only declare once
 
-  if (role === "super admin") {
-    window.location.href = "superadmin-dashboard.html";
-  } else if (role === "admin") {
-    window.location.href = "admin-dashboard.html";
-  } else {
-    window.location.href = "user-mainpage.html";
-  }
+console.log("User role:", role); // Debug
+
+if (role === "super admin") {
+  window.location.href = "superadmin-dashboard.html";
+} else if (role === "admin") {
+  window.location.href = "admin-dashboard.html";
+} else {
+  window.location.href = "user-mainpage.html";
+}
 });
 
 // Forgot Password
