@@ -46,12 +46,12 @@ async function loadDashboardAnalytics() {
     // Adjust table and columns names to your schema
 
     const { count: newBookingsCount } = await supabase
-      .from('appointments')
+      .from('bookings')
       .select('*', { count: 'exact' })
       .eq('status', 'new');
 
     const { count: refundBookingsCount } = await supabase
-      .from('appointments')
+      .from('bookings')
       .select('*', { count: 'exact' })
       .eq('status', 'refund');
 
