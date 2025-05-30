@@ -1,34 +1,51 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
-const SUPABASE_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const messageEl = document.getElementById('message');
+const resetBtn = document.getElementById('reset-btn');
 
-document.addEventListener('DOMContentLoaded', () => {
-  const resetBtn = document.getElementById('reset-btn');
-  const messageEl = document.getElementById('message');
+function showMessage(text, isError = false) {
+  messageEl.textContent = text;
+  messageEl.className = isError ? 'error' : 'success';
+}
 
-  function showMessage(text, isError) {
-    messageEl.textContent = text;
-    messageEl.style.color = isError ? 'red' : 'green';
+// Get token from URL fragment
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const access_token = params.get("access_token");
+const type = params.get("type");
+
+if (type !== "recovery" || !access_token) {
+  showMessage("Invalid or missing token in URL.", true);
+}
+
+resetBtn.addEventListener('click', async () => {
+  const newPassword = document.getElementById('new-password').value.trim();
+  if (newPassword.length < 6) {
+    return showMessage("Password must be at least 6 characters.", true);
   }
 
-  resetBtn.addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    const token = document.getElementById('otp').value.trim();
-    const newPassword = document.getElementById('new-password').value.trim();
-
-    if (!email) return showMessage('Please enter your email.', true);
-    if (!token || token.length !== 6) return showMessage('Please enter the 6-digit code.', true);
-    if (newPassword.length < 6) return showMessage('Password must be at least 6 characters.', true);
-
-    const { error: verifyError } = await supabase.auth.verifyOtp({ email, token, type: 'recovery' });
-    if (verifyError) return showMessage('OTP verification error: ' + verifyError.message, true);
-
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    if (updateError) return showMessage('Update error: ' + updateError.message, true);
-
-    showMessage('Password updated successfully! Redirecting...', false);
-    setTimeout(() => window.location.href = '/', 1500);
+  // Set session using the token
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token,
+    refresh_token: access_token // For recovery flow, refresh_token isn't needed
   });
+
+  if (sessionError) {
+    return showMessage("Invalid or expired token. Please try resetting again.", true);
+  }
+
+  // Update password
+  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+  if (updateError) {
+    return showMessage("Failed to update password: " + updateError.message, true);
+  }
+
+  showMessage("Password updated successfully! Redirecting...");
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 2000);
 });
