@@ -148,62 +148,62 @@
   </div>
 </section>
 
+        <!-- Booking History -->
+        <section id="booking-history" class="tab">
+          <h2>Booking History</h2>
+          <div class="user-form">
+            <div class="form-group">
+              <select id="bookingFilter" onchange="filterBookings()">
+                <option value="all">All</option>
+                <option value="day">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+          </div>
 
-        <!-- Booking History Tab -->
-<section id="booking-history" class="tab">
-  <h2>Booking History</h2>
-  
-  <div class="booking-controls">
-    <div class="filter-group">
-      <select id="bookingFilter" class="filter-select">
-        <option value="all">All Bookings</option>
-        <option value="today">Today</option>
-        <option value="week">This Week</option>
-        <option value="month">This Month</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <input type="text" id="bookingSearch" placeholder="Search bookings..." class="search-input">
-    </div>
-    <button id="exportBookings" class="export-btn">
-      <i class="fas fa-download"></i> Export
-    </button>
-  </div>
+          <div class="edit-users" id="bookingList">
+            <h3>Successful Bookings</h3>
+            <ul class="user-list" id="bookings-list"></ul>
+          </div>
+        </section>
 
-  <div class="booking-list-container">
-    <div class="booking-stats">
-      <span id="totalBookings">0 bookings</span>
-      <span id="totalRevenue">₱0 revenue</span>
-    </div>
-    
-    <div class="booking-list-header">
-      <span>Client</span>
-      <span>Package</span>
-      <span>Date</span>
-      <span>Amount</span>
-      <span>Status</span>
-    </div>
-    
-    <div class="booking-list" id="bookingList">
-      <!-- Bookings will be loaded here dynamically -->
-    </div>
-    
-    <div class="booking-pagination">
-      <button id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
-      <span id="pageInfo">Page 1 of 1</span>
-      <button id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
-    </div>
-  </div>
-  
-  <!-- Booking Detail Modal -->
-  <div id="bookingModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h3>Booking Details</h3>
-      <div id="bookingDetails"></div>
-    </div>
-  </div>
-</section>
+        <!-- User Management -->
+        <section id="user-management" class="tab">
+          <h2>User Management</h2>
+          <div class="user-form">
+            <h3>Add User</h3>
+            <form id="addUserForm">
+              <div class="form-group">
+                <input type="text" placeholder="First Name" required />
+                <input type="text" placeholder="Last Name" required />
+              </div>
+              <div class="form-group">
+                <input type="date" placeholder="Birthday" required />
+                <input type="tel" placeholder="Contact No." required />
+              </div>
+              <div class="form-group">
+                <input type="email" placeholder="Email" required />
+                <input type="password" id="password" placeholder="Password" required />
+              </div>
+<div class="form-group show-pass">
+  <label>
+    Show Password
+    <input type="checkbox" id="showPassword" onclick="togglePassword()">
+  </label>
+</div>
+              <button type="submit">Add User</button>
+            </form>
+          </div>
+
+          <div style="height: 2rem;"></div>
+
+          <div class="edit-users">
+            <h3>Users</h3>
+            <ul class="user-list" id="users-list"></ul>
+          </div>
+        </section>
 
         <!-- Gallery -->
         <section id="gallery" class="tab">
