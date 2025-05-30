@@ -285,304 +285,56 @@ addAppointmentForm.addEventListener('submit', async (e) => {
 // BOOKING HISTORY
 //
 
-// Booking History Variables
-let currentPage = 1;
-const bookingsPerPage = 10;
-let allAppointments = [];
-
-// Initialize Booking History
-async function initBookingHistory() {
-  await loadAppointments();
-  setupEventListeners();
-}
-
-// Load Appointments from Supabase
-async function loadAppointments(filter = 'all', searchQuery = '') {
+async function loadBookings(filter = 'all') {
   try {
-    let query = supabase
-      .from('appointments')
-      .select('*')
-      .order('date', { ascending: false })
-      .order('time', { ascending: false });
+    let query = supabase.from('bookings').select('*').order('created_at', { ascending: false });
 
-    // Apply filters
+    // Filter by timeframe
     if (filter !== 'all') {
       const now = new Date();
       let fromDate = new Date();
 
       switch (filter) {
-        case 'today':
+        case 'day':
           fromDate.setHours(0, 0, 0, 0);
-          query = query.gte('date', fromDate.toISOString().split('T')[0]);
           break;
         case 'week':
-          fromDate.setDate(now.getDate() - now.getDay());
+          const dayOfWeek = now.getDay(); // Sunday=0
+          fromDate.setDate(now.getDate() - dayOfWeek);
           fromDate.setHours(0, 0, 0, 0);
-          query = query.gte('date', fromDate.toISOString().split('T')[0]);
           break;
         case 'month':
           fromDate.setDate(1);
           fromDate.setHours(0, 0, 0, 0);
-          query = query.gte('date', fromDate.toISOString().split('T')[0]);
           break;
-        case 'completed':
-          query = query.eq('payment_status', 'Paid');
-          break;
-        case 'cancelled':
-          query = query.eq('payment_status', 'Cancelled');
+        case 'year':
+          fromDate.setMonth(0, 1);
+          fromDate.setHours(0, 0, 0, 0);
           break;
       }
+
+      query = query.gte('created_at', fromDate.toISOString());
     }
 
-    // Apply search
-    if (searchQuery) {
-      query = query.or(
-        `first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`
-      );
-    }
-
-    const { data: appointments, error } = await query;
+    const { data: bookings, error } = await query;
     if (error) throw error;
 
-    allAppointments = appointments || [];
-    updateBookingStats();
-    renderAppointments();
-  } catch (error) {
-    console.error('Error loading appointments:', error);
-    document.getElementById('bookingList').innerHTML = `
-      <div class="booking-error">Error loading appointments. Please try again.</div>
-    `;
-  }
-}
+    const bookingsList = document.getElementById('bookings-list');
+    bookingsList.innerHTML = '';
 
-// Render Appointments to UI
-function renderAppointments() {
-  const startIdx = (currentPage - 1) * bookingsPerPage;
-  const endIdx = startIdx + bookingsPerPage;
-  const paginatedAppointments = allAppointments.slice(startIdx, endIdx);
-
-  const bookingList = document.getElementById('bookingList');
-  bookingList.innerHTML = '';
-
-  if (paginatedAppointments.length === 0) {
-    bookingList.innerHTML = '<div class="no-bookings">No appointments found</div>';
-    return;
-  }
-
-  paginatedAppointments.forEach(appointment => {
-    const appointmentDate = new Date(appointment.date);
-    const formattedDate = appointmentDate.toLocaleDateString('en-PH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    bookings.forEach(b => {
+      const li = document.createElement('li');
+      li.textContent = `${b.full_name ?? 'Unknown'} - ${b.package ?? ''} on ${b.date ?? ''} (${b.status ?? 'unknown'})`;
+      bookingsList.appendChild(li);
     });
-
-    const bookingItem = document.createElement('div');
-    bookingItem.className = 'booking-item';
-    bookingItem.innerHTML = `
-      <div class="booking-client">
-        <span class="booking-client-name">${appointment.first_name} ${appointment.last_name || ''}</span>
-        <span class="booking-client-email">${appointment.email || ''}</span>
-      </div>
-      <div class="booking-package">${appointment.package_name || '-'}</div>
-      <div class="booking-date">${formattedDate} at ${appointment.time}</div>
-      <div class="booking-amount">₱${appointment.total_price?.toLocaleString('en-PH') || '0'}</div>
-      <div class="booking-status status-${appointment.payment_status.toLowerCase()}">${appointment.payment_status}</div>
-    `;
-    bookingItem.addEventListener('click', () => showAppointmentDetails(appointment.id));
-    bookingList.appendChild(bookingItem);
-  });
-
-  updatePagination();
-}
-
-// Show Appointment Details Modal
-async function showAppointmentDetails(appointmentId) {
-  try {
-    const { data: appointment, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .eq('id', appointmentId)
-      .single();
-
-    if (error) throw error;
-
-    const appointmentDate = new Date(appointment.date);
-    const formattedDate = appointmentDate.toLocaleDateString('en-PH', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-
-    const detailsHtml = `
-      <div class="detail-row">
-        <span class="detail-label">Client:</span>
-        <span>${appointment.first_name} ${appointment.last_name || ''}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Contact:</span>
-        <span>${appointment.email || ''} ${appointment.phone ? `• ${appointment.phone}` : ''}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Package:</span>
-        <span>${appointment.package_name || '-'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Date & Time:</span>
-        <span>${formattedDate} at ${appointment.time}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Status:</span>
-        <span class="booking-status status-${appointment.payment_status.toLowerCase()}">
-          ${appointment.payment_status}
-        </span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">Amount:</span>
-        <span>₱${appointment.total_price?.toLocaleString('en-PH') || '0'}</span>
-      </div>
-      ${appointment.payment_method ? `
-      <div class="detail-row">
-        <span class="detail-label">Payment Method:</span>
-        <span>${appointment.payment_method}</span>
-      </div>` : ''}
-      ${appointment.image_url ? `
-      <div class="detail-row">
-        <span class="detail-label">Image:</span>
-        <img src="${appointment.image_url}" style="max-width: 200px; margin-top: 10px;">
-      </div>` : ''}
-      <div class="detail-actions">
-        <button class="btn" onclick="closeModal()">Close</button>
-      </div>
-    `;
-
-    document.getElementById('bookingDetails').innerHTML = detailsHtml;
-    document.getElementById('bookingModal').style.display = 'block';
   } catch (error) {
-    alert('Error loading appointment details: ' + error.message);
+    console.error('Error loading bookings:', error);
   }
 }
 
-// Update Booking Stats
-function updateBookingStats() {
-  const totalAppointments = allAppointments.length;
-  const totalRevenue = allAppointments.reduce((sum, appt) => sum + (appt.total_price || 0), 0);
-  const paidAppointments = allAppointments.filter(a => a.payment_status === 'Paid').length;
-
-  document.getElementById('totalBookings').textContent = 
-    `${totalAppointments} appointments (${paidAppointments} paid)`;
-  document.getElementById('totalRevenue').textContent = 
-    `₱${totalRevenue.toLocaleString('en-PH')} revenue`;
-}
-
-// Update Pagination Controls
-function updatePagination() {
-  const totalPages = Math.ceil(allAppointments.length / bookingsPerPage);
-  document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-  document.getElementById('prevPage').disabled = currentPage === 1;
-  document.getElementById('nextPage').disabled = currentPage >= totalPages;
-}
-
-// Export Appointments to CSV
-async function exportAppointments() {
-  try {
-    const { data: appointments, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) throw error;
-
-    if (!appointments || appointments.length === 0) {
-      alert('No appointments to export');
-      return;
-    }
-
-    // Create CSV content
-    const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Package', 'Date', 'Time', 'Status', 'Amount', 'Payment Method'];
-    const csvRows = [
-      headers.join(','),
-      ...appointments.map(appt => [
-        `"${appt.first_name || ''}"`,
-        `"${appt.last_name || ''}"`,
-        `"${appt.email || ''}"`,
-        `"${appt.phone || ''}"`,
-        `"${appt.package_name || ''}"`,
-        `"${new Date(appt.date).toLocaleDateString()}"`,
-        `"${appt.time || ''}"`,
-        `"${appt.payment_status || ''}"`,
-        `"₱${appt.total_price?.toLocaleString('en-PH') || '0'}"`,
-        `"${appt.payment_method || ''}"`
-      ].join(','))
-    ];
-
-    // Download CSV
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `appointments_export_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error('Error exporting appointments:', error);
-    alert('Error exporting appointments: ' + error.message);
-  }
-}
-
-// Setup Event Listeners
-function setupEventListeners() {
-  // Filter change
-  document.getElementById('bookingFilter').addEventListener('change', (e) => {
-    currentPage = 1;
-    loadAppointments(e.target.value, document.getElementById('bookingSearch').value);
-  });
-
-  // Search input
-  document.getElementById('bookingSearch').addEventListener('input', (e) => {
-    currentPage = 1;
-    loadAppointments(document.getElementById('bookingFilter').value, e.target.value);
-  });
-
-  // Pagination
-  document.getElementById('prevPage').addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderAppointments();
-    }
-  });
-
-  document.getElementById('nextPage').addEventListener('click', () => {
-    const totalPages = Math.ceil(allAppointments.length / bookingsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderAppointments();
-    }
-  });
-
-  // Export button
-  document.getElementById('exportBookings').addEventListener('click', exportAppointments);
-
-  // Modal close
-  document.querySelector('.close-modal').addEventListener('click', closeModal);
-  window.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('bookingModal')) {
-      closeModal();
-    }
-  });
-}
-
-// Close Modal
-function closeModal() {
-  document.getElementById('bookingModal').style.display = 'none';
-}
-
-// Initialize when booking history tab is shown
-function loadBookings() {
-  initBookingHistory();
+function filterBookings() {
+  const filter = document.getElementById('bookingFilter').value;
+  loadBookings(filter);
 }
 
 //
@@ -751,6 +503,5 @@ showTab('dashboard', document.querySelector('.sidebar-item.active'));
 // Add event listeners to timeframe selects on dashboard to refresh counts if changed
 document.getElementById('analytics-timeframe').addEventListener('change', loadDashboardAnalytics);
 document.getElementById('package-timeframe').addEventListener('change', loadDashboardAnalytics);
-document.getElementById('cancelEditBtn').addEventListener('click', cancelAppointmentEdit);
 
 loadGallery();
