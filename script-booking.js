@@ -180,7 +180,7 @@ async function submitBooking(paymentMethod) {
       paymentMethod,
       totalPrice: finalPrice
     });
-    window.location.href = "user-mainpage.html";
+    window.location.href = "index.html";
   }
 }
 
