@@ -55,7 +55,7 @@
     showMessage('Password updated successfully! Redirecting...', false);
 
     setTimeout(() => {
-      window.location.href = '/'; // Redirect after success
+      window.location.href = 'auth.html'; // Redirect after success
     }, 1500);
   });
 
