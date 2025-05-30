@@ -2,50 +2,38 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MzI5OTAsImV4cCI6MjA2MzMwODk5MH0.q0LtxZt6-sCWxBKpPnHc6Gn34I11KVJkqvhPHqnEqIU';
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-const messageEl = document.getElementById('message');
+const SUPABASE_URL = 'https://rdgahcjjbewvyqcfdtih.supabase.co';
+const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkZ2FoY2pqYmV3dnlxY2ZkdGloIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzczMjk5MCwiZXhwIjoyMDYzMzA4OTkwfQ.zILANJgS0HHNhgv40m6yYxHCceV3J9Upaoi_hJ4dTsU';
+
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
 const resetBtn = document.getElementById('reset-btn');
+const messageEl = document.getElementById('message');
 
-function showMessage(text, isError = false) {
+function showMessage(text, isError) {
   messageEl.textContent = text;
   messageEl.className = isError ? 'error' : 'success';
 }
 
-// Get token from URL fragment
-const hash = window.location.hash.substring(1);
-const params = new URLSearchParams(hash);
-const access_token = params.get("access_token");
-const type = params.get("type");
-
-if (type !== "recovery" || !access_token) {
-  showMessage("Invalid or missing token in URL.", true);
-}
-
 resetBtn.addEventListener('click', async () => {
+  const userId = document.getElementById('user-id').value.trim();
   const newPassword = document.getElementById('new-password').value.trim();
-  if (newPassword.length < 6) {
-    return showMessage("Password must be at least 6 characters.", true);
+
+  if (!userId || !newPassword) {
+    showMessage('All fields are required.', true);
+    return;
   }
 
-  // Set session using the token
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token,
-    refresh_token: access_token // For recovery flow, refresh_token isn't needed
+  const { data, error } = await supabase.auth.admin.updateUserById(userId, {
+    password: newPassword,
   });
 
-  if (sessionError) {
-    return showMessage("Invalid or expired token. Please try resetting again.", true);
+  if (error) {
+    showMessage('Error: ' + error.message, true);
+    return;
   }
 
-  // Update password
-  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-  if (updateError) {
-    return showMessage("Failed to update password: " + updateError.message, true);
-  }
-
-  showMessage("Password updated successfully! Redirecting...");
-  setTimeout(() => {
-    window.location.href = "/";
-  }, 2000);
+  showMessage('Password reset successfully!', false);
 });
